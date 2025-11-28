@@ -10,6 +10,7 @@ const getAPIBaseURL = () => {
 };
 
 const API_BASE_URL = getAPIBaseURL();
+// Disponibilizar globalmente para outros scripts
 window.API_BASE_URL = API_BASE_URL;
 
 if (typeof window.apiRequest === 'undefined') {
@@ -39,6 +40,7 @@ if (typeof window.apiRequest === 'undefined') {
 }
 
 const GameAPI = {
+    // Criar uma nova partida
     async createGame(gameData) {
         return await window.apiRequest('/games', {
             method: 'POST',
@@ -46,14 +48,17 @@ const GameAPI = {
         });
     },
 
+    // Buscar uma partida por ID
     async getGame(gameId) {
         return await window.apiRequest(`/games/${gameId}`);
     },
 
+    // Listar todas as partidas do usuário
     async getAllGames() {
         return await window.apiRequest('/games');
     },
 
+    // Atualizar uma partida
     async updateGame(gameId, gameData) {
         return await window.apiRequest(`/games/${gameId}`, {
             method: 'PUT',
@@ -61,6 +66,7 @@ const GameAPI = {
         });
     },
 
+    // Adicionar um movimento a uma partida
     async addMove(gameId, moveData) {
         return await window.apiRequest(`/games/${gameId}/moves`, {
             method: 'POST',
@@ -68,17 +74,20 @@ const GameAPI = {
         });
     },
 
+    // Deletar uma partida
     async deleteGame(gameId) {
         return await window.apiRequest(`/games/${gameId}`, {
             method: 'DELETE'
         });
     },
 
+    // Buscar partidas finalizadas
     async getFinishedGames() {
         return await window.apiRequest('/games/finished/all');
     }
 };
 
+// Função para serializar o estado do tabuleiro
 function serializeBoardState(game) {
     const boardState = [];
     for (let row = 1; row <= 8; row++) {
@@ -97,6 +106,7 @@ function serializeBoardState(game) {
     return JSON.stringify(boardState);
 }
 
+// Função para salvar o estado atual da partida
 async function saveGameState(game, gameId = null) {
     try {
         const gameData = {
@@ -120,8 +130,10 @@ async function saveGameState(game, gameId = null) {
         };
 
         if (gameId) {
+            // Atualiza partida existente
             return await GameAPI.updateGame(gameId, gameData);
         } else {
+            // Cria nova partida
             return await GameAPI.createGame(gameData);
         }
     } catch (error) {
@@ -129,6 +141,7 @@ async function saveGameState(game, gameId = null) {
     }
 }
 
+// Função para salvar um movimento
 async function saveMove(game, gameId, fromRow, fromCol, toRow, toCol, capturedPiece = null) {
     if (!gameId) return null;
 
@@ -150,6 +163,7 @@ async function saveMove(game, gameId, fromRow, fromCol, toRow, toCol, capturedPi
             }
         };
 
+        // Se o jogo terminou, adiciona o vencedor
         if (game.gameState === 'checkmate') {
             moveData.winner = game.currentPlayer === 'branco' ? 'preto' : 'branco';
         }

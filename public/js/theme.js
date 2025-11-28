@@ -1,4 +1,4 @@
-
+// Gerenciador de tema Dark/Light
 class ThemeManager {
     constructor() {
         this.themeKey = 'chess-app-theme';
@@ -6,7 +6,7 @@ class ThemeManager {
     }
 
     init() {
-        
+        // Esperar DOM estar pronto
         if (document.readyState === 'loading') {
             document.addEventListener('DOMContentLoaded', () => this.loadTheme());
         } else {
@@ -15,16 +15,16 @@ class ThemeManager {
     }
 
     loadTheme() {
-        
+        // Verificar se o tema já foi aplicado pelo script inline
         const htmlTheme = document.documentElement.getAttribute('data-theme');
         const theme = htmlTheme || localStorage.getItem(this.themeKey) || 
                      (window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light');
         
-        
+        // Aplicar tema no body quando estiver disponível
         if (document.body) {
             this.setTheme(theme);
             
-            
+            // Remover estilo crítico após CSS carregar (pequeno delay)
             setTimeout(() => {
                 const criticalStyle = document.getElementById('critical-theme-style');
                 if (criticalStyle) {
@@ -32,7 +32,7 @@ class ThemeManager {
                 }
             }, 100);
         } else {
-            
+            // Aguardar body estar disponível
             const observer = new MutationObserver(() => {
                 if (document.body) {
                     this.setTheme(theme);
@@ -54,7 +54,7 @@ class ThemeManager {
         document.body.classList.add(`${theme}-theme`);
         localStorage.setItem(this.themeKey, theme);
         
-        
+        // Atualizar botão após um pequeno delay para garantir que o DOM está pronto
         setTimeout(() => this.updateThemeButton(), 50);
     }
 
@@ -70,7 +70,7 @@ class ThemeManager {
         } else if (document.body.classList.contains('light-theme')) {
             return 'light';
         }
-        
+        // Se nenhuma classe, verificar localStorage ou usar padrão
         const savedTheme = localStorage.getItem(this.themeKey);
         return savedTheme || 'light';
     }
@@ -83,17 +83,21 @@ class ThemeManager {
             const icon = btn.querySelector('.theme-icon');
             if (icon) {
                 if (currentTheme === 'dark') {
-                    icon.textContent = '☀️'; 
+                    icon.textContent = '☀️'; // Sol para dark mode
                     icon.setAttribute('title', 'Tema claro');
                 } else {
-                    icon.textContent = '🌙'; 
+                    icon.textContent = '🌙'; // Lua para light mode
                     icon.setAttribute('title', 'Tema escuro');
                 }
             }
         });
     }
 }
+
+// Criar instância global
 const themeManager = new ThemeManager();
+
+// Função global para alternar tema (chamada pelo botão)
 function toggleTheme() {
     themeManager.toggleTheme();
 }

@@ -2,7 +2,9 @@ const express = require('express');
 const router = express.Router();
 const Room = require('../models/Room');
 const { requireAuth } = require('../middleware/auth');
-const roomManager = require('../../socket/roomManager');
+const roomManager = require('../socket/roomManager');
+
+// GET - Listar salas disponíveis
 router.get('/available', requireAuth, async (req, res) => {
     try {
         const rooms = await roomManager.getAvailableRooms();
@@ -11,6 +13,8 @@ router.get('/available', requireAuth, async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
+// GET - Buscar sala por ID
 router.get('/:roomId', requireAuth, async (req, res) => {
     try {
         const room = await roomManager.getRoom(req.params.roomId);
@@ -19,7 +23,7 @@ router.get('/:roomId', requireAuth, async (req, res) => {
             return res.status(404).json({ error: 'Sala não encontrada' });
         }
 
-        
+        // Verifica se o usuário está na sala
         const isPlayer = (room.player1 && room.player1.userId.toString() === req.session.userId.toString()) ||
                         (room.player2 && room.player2.userId.toString() === req.session.userId.toString());
 
@@ -32,6 +36,8 @@ router.get('/:roomId', requireAuth, async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
+// GET - Histórico de partidas online do usuário
 router.get('/history/my', requireAuth, async (req, res) => {
     try {
         const rooms = await Room.find({

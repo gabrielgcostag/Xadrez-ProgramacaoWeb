@@ -3,6 +3,8 @@ const router = express.Router();
 const User = require('../models/User');
 const { requireAuth } = require('../middleware/auth');
 const bcrypt = require('bcryptjs');
+
+// GET - Obter perfil do usuário logado
 router.get('/', requireAuth, async (req, res) => {
     try {
         const user = await User.findById(req.session.userId).select('-password');
@@ -14,6 +16,8 @@ router.get('/', requireAuth, async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
+// PUT - Atualizar perfil do usuário logado
 router.put('/', requireAuth, async (req, res) => {
     try {
         const { nome, email, idade, foto, pais, estado, cidade } = req.body;
@@ -23,7 +27,7 @@ router.put('/', requireAuth, async (req, res) => {
             return res.status(404).json({ error: 'Usuário não encontrado' });
         }
 
-        
+        // Verifica se email já está em uso por outro usuário
         if (email && email !== user.email) {
             const existingUser = await User.findOne({ email });
             if (existingUser) {
@@ -31,7 +35,7 @@ router.put('/', requireAuth, async (req, res) => {
             }
         }
 
-        
+        // Atualiza campos
         if (nome !== undefined) user.nome = nome;
         if (email !== undefined) user.email = email;
         if (idade !== undefined) user.idade = idade;
@@ -42,7 +46,7 @@ router.put('/', requireAuth, async (req, res) => {
 
         await user.save();
 
-        
+        // Retorna usuário sem senha
         const userResponse = user.toJSON();
         res.json({
             message: 'Perfil atualizado com sucesso',
@@ -56,6 +60,8 @@ router.put('/', requireAuth, async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
+// PUT - Trocar senha
 router.put('/password', requireAuth, async (req, res) => {
     try {
         const { currentPassword, newPassword } = req.body;
@@ -73,13 +79,13 @@ router.put('/password', requireAuth, async (req, res) => {
             return res.status(404).json({ error: 'Usuário não encontrado' });
         }
 
-        
+        // Verifica senha atual
         const isMatch = await user.comparePassword(currentPassword);
         if (!isMatch) {
             return res.status(401).json({ error: 'Senha atual incorreta' });
         }
 
-        
+        // Atualiza senha
         user.password = newPassword;
         await user.save();
 
@@ -88,6 +94,8 @@ router.put('/password', requireAuth, async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
+// PUT - Atualizar username
 router.put('/username', requireAuth, async (req, res) => {
     try {
         const { username } = req.body;
@@ -105,7 +113,7 @@ router.put('/username', requireAuth, async (req, res) => {
             return res.status(404).json({ error: 'Usuário não encontrado' });
         }
 
-        
+        // Verifica se username já está em uso
         if (username !== user.username) {
             const existingUser = await User.findOne({ username });
             if (existingUser) {
@@ -116,7 +124,7 @@ router.put('/username', requireAuth, async (req, res) => {
         user.username = username;
         await user.save();
 
-        
+        // Atualiza sessão
         req.session.username = username;
 
         res.json({

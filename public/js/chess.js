@@ -2,13 +2,14 @@ class ChessGame {
     constructor() {
         this.board = this.initializeBoard();
         this.currentPlayer = 'branco';
-        this.gameState = 'playing';
+        this.gameState = 'playing'; // playing, check, checkmate, stalemate, draw
         this.moveHistory = [];
         this.capturedPieces = { branco: [], preto: [] };
         this.castlingRights = {
             branco: { kingSide: true, queenSide: true },
             preto: { kingSide: true, queenSide: true }
         };
+        // alvo de en passant (linha,coluna) ou null
         this.enPassantTarget = null;
     }
 
@@ -75,6 +76,7 @@ class ChessGame {
 
         let capturedPiece = this.getPiece(toRow, toCol);
 
+        // captura en passant
         if (!capturedPiece && piece instanceof Pawn && this.enPassantTarget &&
             this.enPassantTarget.row === toRow && this.enPassantTarget.col === toCol &&
             fromCol !== toCol) {
@@ -88,8 +90,10 @@ class ChessGame {
             this.capturedPieces[capturedPiece.color].push(capturedPiece);
         }
 
+        // atualizar alvo de en passant
         this.enPassantTarget = null;
         if (piece instanceof Pawn && Math.abs(toRow - fromRow) === 2 && fromCol === toCol && !capturedPiece) {
+            // casa "por cima" do peão que andou duas casas
             const middleRow = (fromRow + toRow) / 2;
             this.enPassantTarget = { row: middleRow, col: fromCol };
         }
@@ -113,16 +117,20 @@ class ChessGame {
             moveNumber: this.moveHistory.length + 1
         });
 
+        // após o movimento, passa a vez para o outro jogador
         this.currentPlayer = this.currentPlayer === 'branco' ? 'preto' : 'branco';
 
+        // e então atualiza o estado do jogo do ponto de vista de quem vai jogar
         this.updateGameState();
 
         return true;
     }
 
     handleSpecialMoves(piece, fromRow, fromCol, toRow, toCol) {
+        // Roque
         if (piece instanceof King && Math.abs(toCol - fromCol) === 2) {
             const isKingSide = toCol > fromCol;
+            // nosso tabuleiro usa colunas 1..8
             const rookCol = isKingSide ? 8 : 1;
             const newRookCol = isKingSide ? 6 : 4;
             
@@ -136,10 +144,13 @@ class ChessGame {
             }
         }
 
+        // preciso implementar o en passant aqui
     }
 
     handlePawnPromotion(piece, toRow, toCol) {
         if (piece instanceof Pawn) {
+            // a lógica visual de promoção é tratada em tabuleiro.html (função escolhe)
+            // aqui não promovemos automaticamente para evitar conflito
         }
     }
 
@@ -153,6 +164,7 @@ class ChessGame {
 
         if (!piece.canMove(toRow, toCol, this)) return false;
 
+        // não permitir movimentos que deixem o próprio rei em xeque
         if (this.wouldMovePutKingInCheck(fromRow, fromCol, toRow, toCol, piece.color)) {
             return false;
         }
@@ -191,6 +203,7 @@ class ChessGame {
             for (let col = 1; col <= 8; col++) {
                 const piece = this.getPiece(row, col);
                 if (piece && piece.color !== color) {
+                    // Para o rei inimigo, consideramos apenas o movimento de 1 casa (sem roque)
                     if (piece instanceof King) {
                         const rowDiff = Math.abs(king.row - row);
                         const colDiff = Math.abs(king.col - col);
@@ -290,10 +303,12 @@ class King extends Piece {
         const rowDiff = Math.abs(toRow - this.row);
         const colDiff = Math.abs(toCol - this.col);
         
+        // Movimento de uma casa em qualquer direção
         if (rowDiff <= 1 && colDiff <= 1 && (rowDiff + colDiff) > 0) {
             return true;
         }
 
+        // Roque
         if (this.canCastle(toRow, toCol, game)) {
             return true;
         }
@@ -302,9 +317,10 @@ class King extends Piece {
     }
 
     canCastle(toRow, toCol, game) {
+        // roque: rei deve permanecer na mesma linha e mover exatamente 2 casas na horizontal
         if (toRow !== this.row || Math.abs(toCol - this.col) !== 2) return false;
 
-        if (this.hasMoved) return false;
+        if (this.hasMoved) return false; // se o rei já se moveu, não pode rocar
         if (game.isKingInCheck(this.color)) return false;
 
         const row = this.row;
@@ -315,12 +331,14 @@ class King extends Piece {
         if (!rook || !(rook instanceof Rook) || rook.hasMoved) return false;
         if (rook.color !== this.color) return false;
 
+        // Verificar se as casas entre rei e torre estão vazias
         const startCol = Math.min(this.col, rookCol) + 1;
         const endCol = Math.max(this.col, rookCol);
         for (let col = startCol; col < endCol; col++) {
             if (!game.isSquareEmpty(row, col)) return false;
         }
 
+        // Verificar se o rei não passa por casas em xeque
         const kingDirection = isKingSide ? 1 : -1;
         for (let col = this.col; col !== toCol + kingDirection; col += kingDirection) {
             if (game.wouldMovePutKingInCheck(this.row, this.col, row, col, this.color)) {
@@ -346,6 +364,7 @@ class Queen extends Piece {
         const rowDiff = Math.abs(toRow - this.row);
         const colDiff = Math.abs(toCol - this.col);
         
+        // Movimento em linha reta (horizontal, vertical ou diagonal)
         if (rowDiff === 0 || colDiff === 0 || rowDiff === colDiff) {
             return this.isPathClear(toRow, toCol, game);
         }
@@ -375,6 +394,8 @@ class Queen extends Piece {
         return this.color === 'branco' ? '♕' : '♛';
     }
 }
+
+
 class Rook extends Piece {
     constructor(color, row, col) {
         super(color, row, col);
@@ -385,6 +406,7 @@ class Rook extends Piece {
         const rowDiff = Math.abs(toRow - this.row);
         const colDiff = Math.abs(toCol - this.col);
         
+        // Movimento horizontal ou vertical
         if ((rowDiff === 0 && colDiff > 0) || (colDiff === 0 && rowDiff > 0)) {
             return this.isPathClear(toRow, toCol, game);
         }
@@ -425,6 +447,7 @@ class Bishop extends Piece {
         const rowDiff = Math.abs(toRow - this.row);
         const colDiff = Math.abs(toCol - this.col);
         
+        // Movimento diagonal
         if (rowDiff === colDiff && rowDiff > 0) {
             return this.isPathClear(toRow, toCol, game);
         }
@@ -465,6 +488,7 @@ class Knight extends Piece {
         const rowDiff = Math.abs(toRow - this.row);
         const colDiff = Math.abs(toCol - this.col);
         
+        // Movimento em L: 2 casas em uma direção e 1 casa na perpendicular
         return (rowDiff === 2 && colDiff === 1) || (rowDiff === 1 && colDiff === 2);
     }
 
@@ -477,7 +501,7 @@ class Pawn extends Piece {
     constructor(color, row, col) {
         super(color, row, col);
         this.value = 1;
-        this.direction = color === 'branco' ? -1 : 1;
+        this.direction = color === 'branco' ? -1 : 1; // Brancos sobem, pretos descem
         this.startRow = color === 'branco' ? 7 : 2;
     }
 
@@ -485,19 +509,25 @@ class Pawn extends Piece {
         const rowDiff = toRow - this.row;
         const colDiff = Math.abs(toCol - this.col);
         
+        // Movimento para frente
         if (colDiff === 0) {
+            // Movimento normal de uma casa
             if (rowDiff === this.direction && game.isSquareEmpty(toRow, toCol)) {
                 return true;
             }
+            // Movimento inicial de duas casas
             if (rowDiff === 2 * this.direction && this.row === this.startRow && 
                 game.isSquareEmpty(toRow, toCol) && game.isSquareEmpty(this.row + this.direction, toCol)) {
                 return true;
             }
         }
+        // Captura diagonal
         else if (colDiff === 1 && rowDiff === this.direction) {
+            // captura normal
             if (game.isSquareOccupiedByEnemy(toRow, toCol, this.color)) {
                 return true;
             }
+            // en passant: casa de destino é o alvo de en passant atual
             if (game.enPassantTarget &&
                 game.enPassantTarget.row === toRow &&
                 game.enPassantTarget.col === toCol) {

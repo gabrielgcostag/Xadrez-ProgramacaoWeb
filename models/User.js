@@ -35,7 +35,7 @@ const userSchema = new mongoose.Schema({
     },
     foto: {
         type: String,
-        default: null 
+        default: null
     },
     pais: {
         type: String,
@@ -64,7 +64,7 @@ const userSchema = new mongoose.Schema({
         type: Date,
         default: Date.now
     },
-    
+    // Sistema de Ranking
     score: {
         type: Number,
         default: 0
@@ -86,16 +86,20 @@ const userSchema = new mongoose.Schema({
         default: null
     }
 });
+
+// Atualiza updatedAt antes de salvar
 userSchema.pre('save', function(next) {
     this.updatedAt = Date.now();
     
-    
+    // Atualiza highScore se o score atual for maior
     if (this.score > this.highScore) {
         this.highScore = this.score;
     }
     
     next();
 });
+
+// Hash da senha antes de salvar (apenas se foi modificada)
 userSchema.pre('save', async function(next) {
     if (!this.isModified('password')) return next();
     
@@ -107,9 +111,13 @@ userSchema.pre('save', async function(next) {
         next(error);
     }
 });
+
+// Método para comparar senhas
 userSchema.methods.comparePassword = async function(candidatePassword) {
     return await bcrypt.compare(candidatePassword, this.password);
 };
+
+// Remove a senha do JSON quando retornar o usuário
 userSchema.methods.toJSON = function() {
     const userObject = this.toObject();
     delete userObject.password;

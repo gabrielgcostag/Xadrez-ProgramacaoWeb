@@ -2,6 +2,8 @@ const express = require('express');
 const router = express.Router();
 const Game = require('../models/Game');
 const { requireAuth } = require('../middleware/auth');
+
+// GET - Listar partidas do usuário logado
 router.get('/', requireAuth, async (req, res) => {
     try {
         const games = await Game.find({ userId: req.session.userId })
@@ -12,6 +14,8 @@ router.get('/', requireAuth, async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
+// GET - Buscar uma partida específica por ID (apenas do usuário logado)
 router.get('/:id', requireAuth, async (req, res) => {
     try {
         const game = await Game.findOne({
@@ -27,6 +31,8 @@ router.get('/:id', requireAuth, async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
+// POST - Criar uma nova partida
 router.post('/', requireAuth, async (req, res) => {
     try {
         const game = new Game({
@@ -46,6 +52,8 @@ router.post('/', requireAuth, async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 });
+
+// PUT - Atualizar uma partida existente (apenas do usuário logado)
 router.put('/:id', requireAuth, async (req, res) => {
     try {
         const game = await Game.findOneAndUpdate(
@@ -69,6 +77,8 @@ router.put('/:id', requireAuth, async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 });
+
+// POST - Adicionar um movimento a uma partida
 router.post('/:id/moves', requireAuth, async (req, res) => {
     try {
         const game = await Game.findOne({
@@ -98,7 +108,7 @@ router.post('/:id/moves', requireAuth, async (req, res) => {
             game.capturedPieces = req.body.capturedPieces;
         }
 
-        
+        // Se o jogo terminou, atualiza o winner e finishedAt
         if (req.body.gameState === 'checkmate' || req.body.gameState === 'stalemate') {
             game.finishedAt = Date.now();
             if (req.body.gameState === 'checkmate') {
@@ -114,6 +124,8 @@ router.post('/:id/moves', requireAuth, async (req, res) => {
         res.status(400).json({ error: error.message });
     }
 });
+
+// DELETE - Deletar uma partida (apenas do usuário logado)
 router.delete('/:id', requireAuth, async (req, res) => {
     try {
         const game = await Game.findOneAndDelete({
@@ -129,6 +141,8 @@ router.delete('/:id', requireAuth, async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
+// GET - Buscar partidas finalizadas do usuário
 router.get('/finished/all', requireAuth, async (req, res) => {
     try {
         const games = await Game.find({
@@ -144,3 +158,4 @@ router.get('/finished/all', requireAuth, async (req, res) => {
 });
 
 module.exports = router;
+

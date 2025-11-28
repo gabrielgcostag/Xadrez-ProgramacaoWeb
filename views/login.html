@@ -4,20 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Login - Xadrez</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <script>
-        
+        // Aplicar tema ANTES de qualquer renderização para evitar flash
         (function() {
             const savedTheme = localStorage.getItem('chess-app-theme');
             const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
             const theme = savedTheme || systemPreference;
             
-            
+            // Aplicar diretamente no HTML
             const html = document.documentElement;
             html.setAttribute('data-theme', theme);
             html.classList.add(`${theme}-theme`);
             
-            
+            // Criar e injetar estilo crítico inline
             const style = document.createElement('style');
             style.id = 'critical-theme-style';
             style.textContent = theme === 'dark' 
@@ -26,8 +26,8 @@
             document.head.appendChild(style);
         })();
     </script>
-    <link rel="stylesheet" href="../public/css/styles.css">
-    <script src="../public/js/theme.js"></script>
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="/js/theme.js"></script>
     <style>
         .auth-container {
             max-width: 400px;
@@ -132,7 +132,7 @@
 <body>
     <header class="header">
         <div class="header-content">
-            <h1 class="logo"><a href="index.html" style="color: inherit; text-decoration: none;">Xadrez</a></h1>
+            <h1 class="logo"><a href="/index.html" style="color: inherit; text-decoration: none;">Xadrez</a></h1>
             <nav class="nav">
                 <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Alternar tema">
                     <span class="theme-icon">🌙</span>
@@ -171,6 +171,8 @@
         </div>
     </div>
     
-    <script src="auth.js?v=2"></script>
+    <script src="/js/auth.js"></script>
 </body>
 </html>
+
+

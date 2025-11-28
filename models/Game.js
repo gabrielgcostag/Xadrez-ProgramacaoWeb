@@ -62,6 +62,8 @@ const gameSchema = new mongoose.Schema({
         default: null
     }
 });
+
+// Atualiza o campo updatedAt antes de salvar
 gameSchema.pre('save', function(next) {
     this.updatedAt = Date.now();
     next();

@@ -1,6 +1,6 @@
-
+// API de Perfil (usa apiRequest de auth.js)
 const ProfileAPI = {
-    
+    // Obter perfil do usuário
     async getProfile() {
         const requestFn = window.apiRequest || apiRequest;
         if (typeof requestFn === 'undefined') {
@@ -11,7 +11,7 @@ const ProfileAPI = {
         });
     },
 
-    
+    // Atualizar perfil
     async updateProfile(profileData) {
         const requestFn = window.apiRequest || apiRequest;
         return await requestFn('/profile', {
@@ -20,7 +20,7 @@ const ProfileAPI = {
         });
     },
 
-    
+    // Trocar senha
     async changePassword(currentPassword, newPassword) {
         const requestFn = window.apiRequest || apiRequest;
         return await requestFn('/profile/password', {
@@ -29,7 +29,7 @@ const ProfileAPI = {
         });
     },
 
-    
+    // Atualizar username
     async updateUsername(username) {
         const requestFn = window.apiRequest || apiRequest;
         return await requestFn('/profile/username', {
@@ -38,33 +38,39 @@ const ProfileAPI = {
         });
     }
 };
+
+// Funções da página de perfil
 let currentProfile = null;
 let avatarBase64 = null;
+
+// Carregar perfil ao abrir a página
 document.addEventListener('DOMContentLoaded', async () => {
-    
+    // Verificar autenticação
     try {
         const auth = await AuthAPI.checkAuth();
         if (!auth.authenticated) {
-            window.location.href = 'login.html';
+            window.location.href = '/login.html';
             return;
         }
     } catch (error) {
-        window.location.href = 'login.html';
+        window.location.href = '/login.html';
         return;
     }
 
     await loadProfile();
-    
+    // Só atualiza avatar se a função estiver disponível
     if (typeof window.updateHeaderAvatar === 'function') {
         window.updateHeaderAvatar();
     }
 });
+
+// Carregar dados do perfil
 async function loadProfile() {
     try {
         const profile = await ProfileAPI.getProfile();
         currentProfile = profile;
         
-        
+        // Preencher formulário (só se os elementos existirem - página de perfil)
         const usernameEl = document.getElementById('username');
         const emailEl = document.getElementById('email');
         const nomeEl = document.getElementById('nome');
@@ -81,7 +87,7 @@ async function loadProfile() {
         if (estadoEl) estadoEl.value = profile.estado || '';
         if (cidadeEl) cidadeEl.value = profile.cidade || '';
         
-        
+        // Carregar avatar (só se os elementos existirem)
         const avatarImage = document.getElementById('avatar-image');
         const avatarInitial = document.getElementById('avatar-initial');
         
@@ -92,23 +98,25 @@ async function loadProfile() {
                 avatarInitial.style.display = 'none';
                 avatarBase64 = profile.foto;
             } else {
-                
+                // Mostrar inicial do nome
                 const initial = profile.username ? profile.username.charAt(0).toUpperCase() : '?';
                 avatarInitial.textContent = initial;
             }
         }
         
-        
+        // Atualizar avatar no header se a função estiver disponível
         if (typeof window.updateHeaderAvatar === 'function') {
             window.updateHeaderAvatar();
         }
     } catch (error) {
-        
+        // Só mostra mensagem se a função showMessage existir (página de perfil)
         if (typeof showMessage === 'function') {
             showMessage('Erro ao carregar perfil: ' + error.message, 'error');
         }
     }
 }
+
+// Atualizar perfil
 async function handleUpdateProfile(event) {
     event.preventDefault();
     hideMessage();
@@ -123,29 +131,31 @@ async function handleUpdateProfile(event) {
         cidade: document.getElementById('cidade').value
     };
     
-    
+    // Adicionar foto se foi alterada
     if (avatarBase64) {
         formData.foto = avatarBase64;
     }
     
     try {
-        
+        // Se username mudou, atualizar separadamente
         if (formData.username !== currentProfile.username) {
             await ProfileAPI.updateUsername(formData.username);
             delete formData.username;
         }
         
-        
+        // Atualizar resto do perfil
         if (Object.keys(formData).length > 0) {
             await ProfileAPI.updateProfile(formData);
         }
         
         showMessage('Perfil atualizado com sucesso!', 'success');
-        await loadProfile(); 
+        await loadProfile(); // Recarregar para pegar dados atualizados
     } catch (error) {
         showMessage('Erro ao atualizar perfil: ' + error.message, 'error');
     }
 }
+
+// Trocar senha
 async function handleChangePassword(event) {
     event.preventDefault();
     hideMessage();
@@ -167,6 +177,8 @@ async function handleChangePassword(event) {
         showMessage('Erro ao alterar senha: ' + error.message, 'error');
     }
 }
+
+// Upload de avatar (só se o elemento existir - página de perfil)
 const avatarInput = document.getElementById('avatar-input');
 if (avatarInput) {
     avatarInput.addEventListener('change', function(e) {
@@ -178,7 +190,7 @@ if (avatarInput) {
         return;
     }
     
-    if (file.size > 2 * 1024 * 1024) { 
+    if (file.size > 2 * 1024 * 1024) { // 2MB
         showMessage('A imagem deve ter no máximo 2MB!', 'error');
         return;
     }
@@ -196,6 +208,8 @@ if (avatarInput) {
     reader.readAsDataURL(file);
     });
 }
+
+// Atualizar avatar no header (função global para uso em outras páginas)
 window.updateHeaderAvatar = function() {
     const headerAvatar = document.getElementById('header-avatar');
     const avatarNav = document.getElementById('user-avatar-nav');
@@ -213,16 +227,20 @@ window.updateHeaderAvatar = function() {
         }
     }
 };
+
+// Logout
 async function handleLogout() {
     if (confirm('Deseja realmente sair da sua conta?')) {
         try {
             await AuthAPI.logout();
-            window.location.href = 'login.html';
+            window.location.href = '/login.html';
         } catch (error) {
-            window.location.href = 'login.html';
+            window.location.href = '/login.html';
         }
     }
 }
+
+// Funções auxiliares
 function showMessage(message, type) {
     const messageDiv = document.getElementById('message');
     messageDiv.textContent = message;

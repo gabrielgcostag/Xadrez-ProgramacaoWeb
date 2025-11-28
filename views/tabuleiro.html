@@ -4,20 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Tabuleiro de Xadrez</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <script>
-        
+        // Aplicar tema ANTES de qualquer renderização para evitar flash
         (function() {
             const savedTheme = localStorage.getItem('chess-app-theme');
             const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
             const theme = savedTheme || systemPreference;
             
-            
+            // Aplicar diretamente no HTML
             const html = document.documentElement;
             html.setAttribute('data-theme', theme);
             html.classList.add(`${theme}-theme`);
             
-            
+            // Criar e injetar estilo crítico inline
             const style = document.createElement('style');
             style.id = 'critical-theme-style';
             style.textContent = theme === 'dark' 
@@ -26,34 +26,34 @@
             document.head.appendChild(style);
         })();
     </script>
-    <link rel="stylesheet" href="../public/css/styles.css">
-    <script src="../public/js/theme.js"></script>
-    <script src="../public/js/chess.js"></script>
-    <script src="../public/js/simple-ai.js"></script>
-    <script src="../public/js/auth.js"></script>
-    <script src="api.js?v=2"></script>
-    <script src="../public/js/profile.js"></script>
-    <script src="../public/js/header.js"></script>
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="/js/theme.js"></script>
+    <script src="/js/chess.js"></script>
+    <script src="/js/simple-ai.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/js/profile.js"></script>
+    <script src="/js/header.js"></script>
 </head>
 <body class="board-page">
     <header class="header">
         <div class="header-content">
-            <h1 class="logo"><a href="index.html" style="color: inherit; text-decoration: none;">Xadrez</a></h1>
+            <h1 class="logo"><a href="/index.html" style="color: inherit; text-decoration: none;">Xadrez</a></h1>
             <button class="menu-toggle" id="menuToggle" onclick="toggleMobileMenu()" aria-label="Menu">
                 ☰
             </button>
             <nav class="nav">
-                <a href="login.html" class="nav-link" id="login-link">Login</a>
-                <a href="tabuleiro.html" class="nav-link active">Jogar Local</a>
-                <a href="lobby.html" class="nav-link">Jogar Online</a>
-                <a href="regras.html" class="nav-link">Regras</a>
-                <a href="dom.html" class="nav-link">DOM</a>
-                <a href="sobre.html" class="nav-link">Sobre</a>
+                <a href="/login.html" class="nav-link" id="login-link">Login</a>
+                <a href="/tabuleiro.html" class="nav-link active">Jogar Local</a>
+                <a href="/lobby.html" class="nav-link">Jogar Online</a>
+                <a href="/regras.html" class="nav-link">Regras</a>
+                <a href="/dom.html" class="nav-link">DOM</a>
+                <a href="/sobre.html" class="nav-link">Sobre</a>
                 <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Alternar tema">
                     <span class="theme-icon">🌙</span>
                 </button>
                 <div id="user-avatar-nav" style="display: none; margin-left: 15px;">
-                    <a href="perfil.html" id="avatar-link" style="display: inline-block;">
+                    <a href="/perfil.html" id="avatar-link" style="display: inline-block;">
                         <div id="header-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: #4CAF50; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; cursor: pointer; border: 2px solid white;"></div>
                     </a>
                 </div>
@@ -61,13 +61,13 @@
         </div>
         <div class="mobile-menu" id="mobileMenu">
             <div class="mobile-menu-content">
-                <a href="login.html" class="mobile-menu-link" id="mobile-login-link" onclick="closeMobileMenu()">Login</a>
-                <a href="tabuleiro.html" class="mobile-menu-link" onclick="closeMobileMenu()">Jogar Local</a>
-                <a href="lobby.html" class="mobile-menu-link" onclick="closeMobileMenu()">Jogar Online</a>
-                <a href="regras.html" class="mobile-menu-link" onclick="closeMobileMenu()">Regras</a>
-                <a href="dom.html" class="mobile-menu-link" onclick="closeMobileMenu()">DOM</a>
-                <a href="sobre.html" class="mobile-menu-link" onclick="closeMobileMenu()">Sobre</a>
-                <a href="perfil.html" class="mobile-menu-link" id="mobile-profile-link" onclick="closeMobileMenu()" style="display: none;">Perfil</a>
+                <a href="/login.html" class="mobile-menu-link" id="mobile-login-link" onclick="closeMobileMenu()">Login</a>
+                <a href="/tabuleiro.html" class="mobile-menu-link" onclick="closeMobileMenu()">Jogar Local</a>
+                <a href="/lobby.html" class="mobile-menu-link" onclick="closeMobileMenu()">Jogar Online</a>
+                <a href="/regras.html" class="mobile-menu-link" onclick="closeMobileMenu()">Regras</a>
+                <a href="/dom.html" class="mobile-menu-link" onclick="closeMobileMenu()">DOM</a>
+                <a href="/sobre.html" class="mobile-menu-link" onclick="closeMobileMenu()">Sobre</a>
+                <a href="/perfil.html" class="mobile-menu-link" id="mobile-profile-link" onclick="closeMobileMenu()" style="display: none;">Perfil</a>
                 <button class="mobile-menu-link" onclick="toggleTheme(); closeMobileMenu();" style="background: none; border: none; width: 100%; text-align: left; cursor: pointer;">
                     Alternar Tema
                 </button>
@@ -188,24 +188,27 @@
         let aiDifficulty = 7;
         let currentGameId = null;
 
-        
+        // Funções para tocar sons
         function playMoveSound() {
-            const audio = new Audio('../public/sounds/move-self.mp3');
+            const audio = new Audio('/sounds/move-self.mp3');
             audio.volume = 0.5;
+            audio.play().catch(err => {});
         }
 
         function playCaptureSound() {
-            const audio = new Audio('../public/sounds/capture.mp3');
+            const audio = new Audio('/sounds/capture.mp3');
             audio.volume = 0.5;
+            audio.play().catch(err => {});
         }
 
         function playGameEndSound() {
-            const audio = new Audio('../public/sounds/game-end.mp3');
+            const audio = new Audio('/sounds/game-end.mp3');
             audio.volume = 0.5;
+            audio.play().catch(err => {});
         }
 
         document.addEventListener('DOMContentLoaded', async function() {
-            
+            // Verifica autenticação antes de permitir jogar
             try {
                 const auth = await AuthAPI.checkAuth();
                 if (!auth.authenticated) {
@@ -214,7 +217,7 @@
                     return;
                 }
                 
-                
+                // Mostrar avatar no header imediatamente com inicial
                 const avatarNav = document.getElementById('user-avatar-nav');
                 const headerAvatar = document.getElementById('header-avatar');
                 if (avatarNav && headerAvatar) {
@@ -226,7 +229,7 @@
                     headerAvatar.style.justifyContent = 'center';
                 }
                 
-                
+                // Carregar perfil completo para atualizar avatar com foto se houver
                 setTimeout(() => {
                     loadUserProfileForHeader();
                 }, 500);
@@ -236,10 +239,10 @@
                 return;
             }
             
-            
+            // Carrega temas salvos ou usa padrão
             let savedBoardTheme = localStorage.getItem('boardTheme') || 'green';
             
-            
+            // Migração: converte "vintage" antigo para "azul"
             if (savedBoardTheme === 'vintage') {
                 savedBoardTheme = 'azul';
                 localStorage.setItem('boardTheme', 'azul');
@@ -247,22 +250,22 @@
             
             let savedPiecesTheme = localStorage.getItem('piecesTheme') || 'setClassico';
             
-            
+            // Migração: converte temas antigos (unicode, simple, bold) para setClassico
             if (savedPiecesTheme === 'unicode' || savedPiecesTheme === 'simple' || savedPiecesTheme === 'bold') {
                 savedPiecesTheme = 'setClassico';
                 localStorage.setItem('piecesTheme', 'setClassico');
             }
             
-            
+            // Define os valores nos seletores
             document.getElementById('board-theme').value = savedBoardTheme;
             document.getElementById('pieces-theme').value = savedPiecesTheme;
             
-            
+            // Aplica os temas antes de criar o jogo
             changeBoardTheme();
             changePiecesTheme();
             updatePromotionModal();
             
-            
+            // Cria o jogo (que vai renderizar o tabuleiro)
             newGame();
         });
 
@@ -270,7 +273,7 @@
             game = new ChessGame();
             selectedSquare = null;
             validMoves = [];
-            currentGameId = null; 
+            currentGameId = null; // Reset do ID da partida
             
             if (aiPlayer) {
                 aiPlayer.destroy();
@@ -288,7 +291,7 @@
 
         function getPieceImagePath(piece, theme) {
             if (!theme || !theme.startsWith('set')) {
-                return null; 
+                return null; // Retorna null para temas que não são sets de imagens
             }
             
             const color = piece.color === 'branco' ? 'w' : 'b';
@@ -302,7 +305,7 @@
             };
             
             const pieceCode = pieceMap[piece.constructor.name] || 'p';
-            return `../public/images/${theme}/${color}${pieceCode}.png`;
+            return `/images/${theme}/${color}${pieceCode}.png`;
         }
 
         function renderBoard() {
@@ -316,22 +319,22 @@
                 return;
             }
             
-            
+            // Garante que os temas estejam aplicados
             const currentBoardTheme = document.getElementById('board-theme')?.value || 'green';
             const currentPiecesTheme = document.getElementById('pieces-theme')?.value || 'setClassico';
             
-            
+            // Remove todos os temas
             board.classList.remove('theme-classic', 'theme-dark', 'theme-modern', 'theme-vintage', 'theme-green', 'theme-brown', 'theme-azul');
             board.classList.remove('pieces-setClassico', 'pieces-setMadeira', 'pieces-setVidro');
             
-            
+            // Aplica os temas atuais
             board.classList.add('theme-' + currentBoardTheme);
             board.classList.add('pieces-' + currentPiecesTheme);
             
-            
+            // Limpa o tabuleiro
             board.innerHTML = '';
 
-            
+            // Renderiza todas as casas
             let squaresCreated = 0;
             for (let row = 1; row <= 8; row++) {
                 for (let col = 1; col <= 8; col++) {
@@ -342,8 +345,8 @@
                     square.dataset.row = row;
                     square.dataset.col = col;
                     
-                    
-                    
+                    // Remove estilos inline para permitir que os temas CSS funcionem
+                    // As cores virão das classes CSS do tema aplicado ao tabuleiro
                     square.style.width = '100%';
                     square.style.height = '100%';
                     
@@ -356,14 +359,14 @@
                         if (piece) {
                             const imagePath = getPieceImagePath(piece, currentPiecesTheme);
                             if (imagePath) {
-                                
+                                // Usa imagem PNG
                                 const img = document.createElement('img');
                                 img.src = imagePath;
                                 img.alt = piece.constructor.name;
                                 img.className = 'chess-piece-image';
                                 square.appendChild(img);
                             } else {
-                                
+                                // Usa símbolo Unicode
                                 square.innerHTML = piece.getSymbol();
                             }
                             square.classList.add('has-piece');
@@ -371,12 +374,12 @@
                     } catch (error) {
                     }
 
-                    
+                    // movimentos válidos
                     if (validMoves && validMoves.some(move => move.row === row && move.col === col)) {
                         square.classList.add('valid-move');
                     }
 
-                    
+                    // Destacar casa selecionada
                     if (selectedSquare && selectedSquare.row === row && selectedSquare.col === col) {
                         square.classList.add('selected');
                     }
@@ -401,23 +404,23 @@
                     renderBoard();
                 }
             } else {
-                
+                // ao clicar na mesma casa, remove a seleção
                 if (selectedSquare.row === row && selectedSquare.col === col) {
                     selectedSquare = null;
                     validMoves = [];
                     renderBoard();
                 }
-                
+                // Se clicou em um movimento válido, fazer o movimento
                 else if (validMoves.some(move => move.row === row && move.col === col)) {
                     makeMove(selectedSquare.row, selectedSquare.col, row, col);
                 }
-                
+                // Se clicou em outra peça do jogador atual, selecionar ela
                 else if (piece && piece.color === game.currentPlayer) {
                     selectedSquare = { row, col };
                     validMoves = getValidMoves(row, col);
                     renderBoard();
                 }
-                
+                // se nada acima for feito, remove a seleção
                 else {
                     selectedSquare = null;
                     validMoves = [];
@@ -442,7 +445,7 @@
             const piece = game.getPiece(fromRow, fromCol);
             const capturedPiece = game.getPiece(toRow, toCol);
             
-            
+            // check mate meio errado ainda, preciso corrigir, está ao capturar o rei e nunca se captura o rei
             if (capturedPiece && capturedPiece.constructor.name === 'King') {
                 playGameEndSound();
                 return;
@@ -450,11 +453,11 @@
             
             const success = game.movePiece(fromRow, fromCol, toRow, toCol);
             if (success) {
-                
+                // Toca som de captura se houve captura
                 if (capturedPiece) {
                     playCaptureSound();
                 } else {
-                    
+                    // Toca som de movimento se não houve captura
                     playMoveSound();
                 }
                 
@@ -464,7 +467,7 @@
                 updateGameInfo();
                 updateCapturedPieces();
                 
-                
+                // promoção de peão
                 if (piece && piece.constructor.name === 'Pawn') {
                     if ((piece.color === 'branco' && toRow === 1) || 
                         (piece.color === 'preto' && toRow === 8)) {
@@ -477,31 +480,31 @@
                     }
                 }
                 
-                
+                // Salva o movimento no MongoDB
                 if (currentGameId) {
                     saveMove(game, currentGameId, fromRow, fromCol, toRow, toCol, capturedPiece)
                 }
                 
-                
+                // verifica fim de jogo
                 if (game.gameState === 'checkmate') {
                     playGameEndSound();
-                    
+                    // Mostra modal de vitória após um pequeno delay
                     setTimeout(() => {
                         const winnerColor = game.currentPlayer === 'branco' ? 'preto' : 'branco';
                         showGameEndModal('checkmate', winnerColor);
                     }, 500);
                 } else if (game.gameState === 'stalemate') {
                     playGameEndSound();
-                    
+                    // Mostra modal de empate após um pequeno delay
                     setTimeout(() => {
                         showGameEndModal('stalemate', null);
                     }, 500);
                 } else {
-                    
+                    // Se não é fim de jogo e é modo bot, fazer movimento do bot
                     if (gameMode === 'human-vs-ai' && game.currentPlayer === 'preto' && aiPlayer) {
                         setTimeout(() => {
                             makeAIMove();
-                        }, 500); 
+                        }, 500); // delay para bot jogar
                     }
                 }
             }
@@ -562,7 +565,7 @@
                     const pieceCode = div.dataset.piece;
                     const colorCode = div.dataset.color;
                     const imagePath = currentPiecesTheme.startsWith('set') 
-                        ? `../public/images/${currentPiecesTheme}/${colorCode}${pieceCode}.png` 
+                        ? `/images/${currentPiecesTheme}/${colorCode}${pieceCode}.png` 
                         : null;
                     
                     if (imagePath) {
@@ -649,16 +652,16 @@
             
             const theme = themeSelect.value || 'green';
             
-            
+            // Remove todos os temas (antigos e novos)
             board.classList.remove('theme-classic', 'theme-dark', 'theme-modern', 'theme-vintage', 'theme-green', 'theme-brown', 'theme-azul');
             
-            
+            // Adiciona o tema selecionado
             board.classList.add('theme-' + theme);
             
-            
+            // Salva no localStorage
             localStorage.setItem('boardTheme', theme);
             
-            
+            // Re-renderiza o tabuleiro para aplicar o novo tema
             if (game) {
                 renderBoard();
             }
@@ -672,19 +675,19 @@
             
             const theme = themeSelect.value || 'setClassico';
             
-            
+            // Remove todos os temas de peças (sets)
             board.classList.remove('pieces-setClassico', 'pieces-setMadeira', 'pieces-setVidro');
             
-            
+            // Adiciona o tema selecionado
             board.classList.add('pieces-' + theme);
             
-            
+            // Salva no localStorage
             localStorage.setItem('piecesTheme', theme);
             
-            
+            // Atualiza o modal de promoção
             updatePromotionModal();
             
-            
+            // Re-renderiza o tabuleiro para aplicar o novo tema
             if (game) {
                 renderBoard();
                 updateCapturedPieces();
@@ -705,12 +708,12 @@
                         thinkingElement.style.display = 'none';
                     }
                     
-                    
+                    // result agora é um objeto { success: boolean, captured: boolean }
                     const success = result && result.success;
                     const captured = result && result.captured;
                     
                     if (success) {
-                        
+                        // Toca som apropriado
                         if (captured) {
                             playCaptureSound();
                         } else {
@@ -743,23 +746,23 @@
             }
         }
 
-        
+        // Função de logout
         async function handleLogout() {
             if (confirm('Deseja realmente sair?')) {
                 try {
                     await AuthAPI.logout();
                     window.location.href = 'login.html';
                 } catch (error) {
-                    
+                    // Mesmo com erro, redireciona para login
                     window.location.href = 'login.html';
                 }
             }
         }
 
-        
+        // Carregar perfil do usuário para mostrar no header
         async function loadUserProfileForHeader() {
             try {
-                
+                // Verifica se ProfileAPI está disponível
                 if (typeof ProfileAPI === 'undefined') {
                     return;
                 }
@@ -772,7 +775,7 @@
                     return;
                 }
                 
-                
+                // Atualiza o avatar com foto se houver
                 if (profile.foto) {
                     headerAvatar.innerHTML = `<img src="${profile.foto}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
                 } else {
@@ -783,11 +786,11 @@
                     headerAvatar.style.justifyContent = 'center';
                 }
             } catch (error) {
-                
+                // Se der erro, mantém a inicial que já foi definida
             }
         }
 
-        
+        // Funções de integração com MongoDB
         async function saveCurrentGame() {
             try {
                 const savedGame = await saveGameState(game, currentGameId);
@@ -854,7 +857,7 @@
                     return;
                 }
 
-                
+                // Recria o jogo com os dados salvos
                 game = new ChessGame();
                 currentGameId = savedGame._id;
                 gameMode = savedGame.gameMode;
@@ -866,7 +869,7 @@
                     preto: savedGame.capturedPieces.preto || []
                 };
 
-                
+                // Atualiza os seletores
                 document.getElementById('game-mode').value = gameMode;
                 document.getElementById('difficulty').value = aiDifficulty;
                 if (gameMode === 'human-vs-ai') {
@@ -886,7 +889,7 @@
             }
         }
         
-        
+        // Funções para o modal de fim de jogo
         function showGameEndModal(resultType, winnerColor) {
             const modal = document.getElementById('game-end-modal');
             const title = document.getElementById('game-end-title');

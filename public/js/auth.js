@@ -1,4 +1,5 @@
 const getAPIBaseURL = () => {
+    // Sempre detecta do hostname atual da página para garantir que funciona via IP da rede
     const protocol = window.location.protocol;
     const hostname = window.location.hostname;
     let port = window.location.port;
@@ -47,7 +48,9 @@ window.apiRequest = async function apiRequest(endpoint, options = {}) {
 
 const apiRequest = window.apiRequest;
 
+// API de Autenticação
 const AuthAPI = {
+    // Login
     async login(username, password) {
         return await apiRequest('/auth/login', {
             method: 'POST',
@@ -55,6 +58,7 @@ const AuthAPI = {
         });
     },
 
+    // Cadastro
     async register(username, email, password) {
         return await apiRequest('/auth/register', {
             method: 'POST',
@@ -62,18 +66,22 @@ const AuthAPI = {
         });
     },
 
+    // Logout
     async logout() {
         return await apiRequest('/auth/logout', {
             method: 'POST'
         });
     },
 
+    // Verificar se está autenticado
     async checkAuth() {
         return await apiRequest('/auth/me');
     }
 };
 
+// Funções para a página de login
 function switchTab(tab) {
+    // Atualiza as abas
     document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
     document.querySelectorAll('.auth-content').forEach(c => c.classList.remove('active'));
     
@@ -85,6 +93,7 @@ function switchTab(tab) {
         document.getElementById('register-content').classList.add('active');
     }
     
+    // Limpa mensagens
     hideMessages();
 }
 
@@ -118,7 +127,7 @@ async function handleLogin(event) {
         const result = await AuthAPI.login(username, password);
         showSuccess('Login realizado com sucesso! Redirecionando...');
         setTimeout(() => {
-            window.location.href = 'index.html';
+            window.location.href = '/index.html';
         }, 1000);
     } catch (error) {
         showError(error.message || 'Erro ao fazer login');
@@ -137,19 +146,21 @@ async function handleRegister(event) {
         const result = await AuthAPI.register(username, email, password);
         showSuccess('Cadastro realizado com sucesso! Redirecionando...');
         setTimeout(() => {
-            window.location.href = 'index.html';
+            window.location.href = '/index.html';
         }, 1000);
     } catch (error) {
         showError(error.message || 'Erro ao fazer cadastro');
     }
 }
 
+// Verifica se já está logado ao carregar a página
 window.addEventListener('DOMContentLoaded', async () => {
     try {
         const auth = await AuthAPI.checkAuth();
         if (auth.authenticated) {
+            // Se já está logado e está na página de login, redireciona para home
             if (window.location.pathname.includes('login.html')) {
-                window.location.href = 'index.html';
+                window.location.href = '/index.html';
             }
         }
     } catch (error) {

@@ -92,15 +92,23 @@ const roomSchema = new mongoose.Schema({
         default: null
     }
 });
+
+// Gerar roomId único
 roomSchema.statics.generateRoomId = function() {
     return Math.random().toString(36).substring(2, 8).toUpperCase();
 };
+
+// Verificar se sala está cheia
 roomSchema.methods.isFull = function() {
     return this.player1 && this.player2;
 };
+
+// Verificar se sala está vazia
 roomSchema.methods.isEmpty = function() {
     return !this.player1 && !this.player2;
 };
+
+// Adicionar jogador
 roomSchema.methods.addPlayer = function(userId, username, socketId) {
     if (!this.player1) {
         this.player1 = {
@@ -123,6 +131,8 @@ roomSchema.methods.addPlayer = function(userId, username, socketId) {
     }
     return null;
 };
+
+// Remover jogador
 roomSchema.methods.removePlayer = function(socketId) {
     if (this.player1 && this.player1.socketId === socketId) {
         this.player1 = null;
@@ -133,6 +143,8 @@ roomSchema.methods.removePlayer = function(socketId) {
     }
     return null;
 };
+
+// Obter oponente
 roomSchema.methods.getOpponent = function(socketId) {
     if (this.player1 && this.player1.socketId === socketId) {
         return this.player2;
@@ -141,6 +153,8 @@ roomSchema.methods.getOpponent = function(socketId) {
     }
     return null;
 };
+
+// Obter jogador por socketId
 roomSchema.methods.getPlayer = function(socketId) {
     if (this.player1 && this.player1.socketId === socketId) {
         return this.player1;

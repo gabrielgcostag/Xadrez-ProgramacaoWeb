@@ -8,7 +8,7 @@ function initializeSocket(server, sessionMiddleware) {
         }
     });
 
-    
+    // Compartilhar sessão do Express com Socket.io
     io.engine.use(sessionMiddleware);
 
     return io;

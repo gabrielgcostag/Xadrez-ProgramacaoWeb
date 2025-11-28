@@ -4,20 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Xadrez Online</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <script>
-        
+        // Aplicar tema ANTES de qualquer renderização para evitar flash
         (function() {
             const savedTheme = localStorage.getItem('chess-app-theme');
             const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
             const theme = savedTheme || systemPreference;
             
-            
+            // Aplicar diretamente no HTML
             const html = document.documentElement;
             html.setAttribute('data-theme', theme);
             html.classList.add(`${theme}-theme`);
             
-            
+            // Criar e injetar estilo crítico inline
             const style = document.createElement('style');
             style.id = 'critical-theme-style';
             style.textContent = theme === 'dark' 
@@ -26,15 +26,15 @@
             document.head.appendChild(style);
         })();
     </script>
-    <link rel="stylesheet" href="../public/css/styles.css">
-    <script src="../public/js/theme.js"></script>
-    <script src="../public/js/chess.js"></script>
-    <script src="../public/js/auth.js"></script>
-    <script src="../public/js/api.js"></script>
-    <script src="../public/js/profile.js"></script>
-    <script src="../public/js/header.js"></script>
-    <script src="https:
-    <script src="../public/js/socket-client.js"></script>
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="/js/theme.js"></script>
+    <script src="/js/chess.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/api.js"></script>
+    <script src="/js/profile.js"></script>
+    <script src="/js/header.js"></script>
+    <script src="https://cdn.socket.io/4.7.2/socket.io.min.js"></script>
+    <script src="/js/socket-client.js"></script>
     <style>
         .online-message {
             padding: 10px;
@@ -79,3 +79,1477 @@
             margin-top: 3px;
             color: #333;
         }
+        /* Modo escuro - melhor contraste */
+        [data-theme="dark"] .chat-message .username {
+            color: #5dade2;
+        }
+        [data-theme="dark"] .chat-message .timestamp {
+            color: #a0a0a0;
+        }
+        [data-theme="dark"] .chat-message .message-text {
+            color: #e0e0e0;
+        }
+        [data-theme="dark"] #chat-messages {
+            background: rgba(45, 45, 45, 0.9) !important;
+            color: #e0e0e0;
+        }
+        [data-theme="dark"] #chat-input {
+            background: #2d2d2d;
+            color: #e0e0e0;
+            border-color: #555;
+        }
+        [data-theme="dark"] #chat-input::placeholder {
+            color: #999;
+        }
+        [data-theme="dark"] #chat-target {
+            background: #2d2d2d;
+            color: #e0e0e0;
+            border-color: #555;
+        }
+        #chat-messages {
+            scrollbar-width: thin;
+        }
+        #chat-messages::-webkit-scrollbar {
+            width: 6px;
+        }
+        #chat-messages::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        [data-theme="dark"] #chat-messages::-webkit-scrollbar-track {
+            background: #2d2d2d;
+        }
+        #chat-messages::-webkit-scrollbar-thumb {
+            background: #888;
+            border-radius: 3px;
+        }
+        [data-theme="dark"] #chat-messages::-webkit-scrollbar-thumb {
+            background: #555;
+        }
+    </style>
+</head>
+<body class="board-page">
+    <header class="header">
+        <div class="header-content">
+            <h1 class="logo"><a href="/index.html" style="color: inherit; text-decoration: none;">Xadrez</a></h1>
+            <button class="menu-toggle" id="menuToggle" onclick="toggleMobileMenu()" aria-label="Menu">
+                ☰
+            </button>
+            <nav class="nav">
+                <a href="/login.html" class="nav-link" id="login-link">Login</a>
+                <a href="/tabuleiro.html" class="nav-link">Jogar Local</a>
+                <a href="/lobby.html" class="nav-link">Jogar Online</a>
+                <a href="/regras.html" class="nav-link">Regras</a>
+                <a href="/dom.html" class="nav-link">DOM</a>
+                <a href="/sobre.html" class="nav-link">Sobre</a>
+                <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Alternar tema">
+                    <span class="theme-icon">🌙</span>
+                </button>
+                <div id="user-avatar-nav" style="display: none; margin-left: 15px;">
+                    <a href="/perfil.html" id="avatar-link" style="display: inline-block;">
+                        <div id="header-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: #4CAF50; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; cursor: pointer; border: 2px solid white;"></div>
+                    </a>
+                </div>
+            </nav>
+        </div>
+        <div class="mobile-menu" id="mobileMenu">
+            <div class="mobile-menu-content">
+                <a href="/login.html" class="mobile-menu-link" id="mobile-login-link" onclick="closeMobileMenu()">Login</a>
+                <a href="/tabuleiro.html" class="mobile-menu-link" onclick="closeMobileMenu()">Jogar Local</a>
+                <a href="/lobby.html" class="mobile-menu-link" onclick="closeMobileMenu()">Jogar Online</a>
+                <a href="/regras.html" class="mobile-menu-link" onclick="closeMobileMenu()">Regras</a>
+                <a href="/dom.html" class="mobile-menu-link" onclick="closeMobileMenu()">DOM</a>
+                <a href="/sobre.html" class="mobile-menu-link" onclick="closeMobileMenu()">Sobre</a>
+                <a href="/perfil.html" class="mobile-menu-link" id="mobile-profile-link" onclick="closeMobileMenu()" style="display: none;">Perfil</a>
+                <button class="mobile-menu-link" onclick="toggleTheme(); closeMobileMenu();" style="background: none; border: none; width: 100%; text-align: left; cursor: pointer;">
+                    Alternar Tema
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <div class="board-container">
+        <!-- Menu Lateral Esquerdo: Controles e Informações do Jogo -->
+        <div class="game-sidebar game-sidebar-left">
+            <button class="btn-voltar" onclick="leaveOnlineGame()">
+                Sair da Partida
+            </button>
+            
+            <div class="online-message" id="online-message"></div>
+            
+            <div id="opponent-info"></div>
+            
+            <div class="game-status">
+                <h3 id="current-player">Aguardando...</h3>
+                <p id="game-state">Conectando...</p>
+            </div>
+            
+            <div class="theme-selector">
+                <label for="board-theme">Tema do Tabuleiro:</label>
+                <select id="board-theme" onchange="changeBoardTheme()">
+                    <option value="green">Clássico (verde)</option>
+                    <option value="brown">Castanho</option>
+                    <option value="azul">Azul</option>
+                </select>
+            </div>
+            
+            <div class="theme-selector">
+                <label for="pieces-theme">Tema das Peças:</label>
+                <select id="pieces-theme" onchange="changePiecesTheme()">
+                    <option value="setClassico" selected>Clássico</option>
+                    <option value="setMadeira">Madeira</option>
+                    <option value="setVidro">Vidro</option>
+                </select>
+            </div>
+
+            <!-- Controles de Áudio -->
+            <div class="audio-controls" style="margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.05); border-radius: 8px;">
+                <h4>Controles de Áudio</h4>
+                <div style="margin-bottom: 10px;">
+                    <label style="display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" id="audio-videochat-toggle" checked onchange="toggleVideochatAudio()">
+                        <span>Áudio do Vídeochat</span>
+                    </label>
+                </div>
+                <div>
+                    <label style="display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" id="audio-sounds-toggle" checked onchange="toggleSoundsAudio()">
+                        <span>Efeitos Sonoros</span>
+                    </label>
+                </div>
+            </div>
+        </div>
+
+        <!-- Menu Lateral Direito: Vídeochat e Chat -->
+        <div class="game-sidebar game-sidebar-right">
+            <!-- Vídeochat -->
+            <div class="videochat-container" style="padding: 15px; background: rgba(0,0,0,0.05); border-radius: 8px;">
+                <h4>Vídeochat</h4>
+                <div style="display: flex; flex-direction: column; gap: 10px;">
+                    <!-- Botão de iniciar/convite -->
+                    <div id="videochat-invite-section">
+                        <button id="videochat-toggle-btn" onclick="sendVideochatInvite()" style="padding: 10px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; width: 100%;">
+                            Convidar para Vídeochat
+                        </button>
+                        <div id="videochat-invite-status" style="display: none; margin-top: 10px; padding: 10px; background: rgba(52, 152, 219, 0.1); border-radius: 5px; text-align: center; font-size: 0.9em;">
+                            <p id="invite-status-text"></p>
+                            <div id="invite-buttons" style="display: none; gap: 5px; margin-top: 10px;">
+                                <button onclick="acceptVideochatInvite()" style="padding: 5px 10px; background: #27ae60; color: white; border: none; border-radius: 3px; cursor: pointer; flex: 1;">Aceitar</button>
+                                <button onclick="rejectVideochatInvite()" style="padding: 5px 10px; background: #e74c3c; color: white; border: none; border-radius: 3px; cursor: pointer; flex: 1;">Rejeitar</button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Vídeos e controles -->
+                    <div id="videochat-videos" style="display: none; flex-direction: column; gap: 10px;">
+                        <div style="position: relative;">
+                            <video id="local-video" autoplay muted style="width: 100%; max-width: 200px; border-radius: 5px; background: #000;"></video>
+                            <button id="toggle-local-video" onclick="toggleLocalVideo()" style="position: absolute; top: 5px; right: 5px; padding: 5px; background: rgba(0,0,0,0.7); color: white; border: none; border-radius: 3px; cursor: pointer;" title="Desligar câmera">📹</button>
+                        </div>
+                        <div style="position: relative;">
+                            <video id="remote-video" autoplay style="width: 100%; max-width: 200px; border-radius: 5px; background: #000;"></video>
+                            <button id="toggle-remote-video" onclick="toggleRemoteVideo()" style="position: absolute; top: 5px; right: 5px; padding: 5px; background: rgba(0,0,0,0.7); color: white; border: none; border-radius: 3px; cursor: pointer;" title="Ocultar vídeo">👁️</button>
+                        </div>
+                        
+                        <!-- Controles de áudio -->
+                        <div style="display: flex; gap: 5px; flex-wrap: wrap;">
+                            <button id="toggle-local-audio" onclick="toggleLocalAudio()" style="flex: 1; padding: 8px; background: #27ae60; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 0.9em;">🔊 Meu Áudio</button>
+                            <button id="toggle-remote-audio" onclick="toggleRemoteAudio()" style="flex: 1; padding: 8px; background: #27ae60; color: white; border: none; border-radius: 3px; cursor: pointer; font-size: 0.9em;">🔊 Áudio Remoto</button>
+                        </div>
+                        
+                        <button onclick="stopVideochat()" style="padding: 8px; background: #e74c3c; color: white; border: none; border-radius: 3px; cursor: pointer; width: 100%;">Encerrar Vídeochat</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Chat -->
+            <div class="chat-container" style="margin-top: 20px; padding: 15px; background: rgba(0,0,0,0.05); border-radius: 8px; max-height: 400px; display: flex; flex-direction: column;">
+                <h4>Chat</h4>
+                
+                <!-- Seleção de Destinatário -->
+                <div style="margin-bottom: 10px;">
+                    <select id="chat-target" onchange="updateChatTarget()" style="width: 100%; padding: 5px; border-radius: 5px;">
+                        <option value="room">Jogadores Ativos (2 jogadores em partida)</option>
+                        <option value="general">Geral (jogadores ativos e em fila)</option>
+                    </select>
+                </div>
+
+                <!-- Mensagens -->
+                <div id="chat-messages" style="flex: 1; overflow-y: auto; min-height: 200px; max-height: 250px; padding: 10px; background: rgba(255,255,255,0.8); border-radius: 5px; margin-bottom: 10px;">
+                    <!-- Mensagens serão inseridas aqui -->
+                </div>
+
+                <!-- Input de Mensagem -->
+                <div style="display: flex; gap: 5px; width: 100%; box-sizing: border-box;">
+                    <input type="text" id="chat-input" placeholder="Digite sua mensagem..." style="flex: 1; min-width: 0; padding: 8px; border-radius: 5px; border: 1px solid #ddd; box-sizing: border-box;" onkeypress="handleChatKeyPress(event)">
+                    <button onclick="sendChatMessage()" style="padding: 8px 15px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; flex-shrink: 0; white-space: nowrap;">Enviar</button>
+                </div>
+            </div>
+        </div>
+        
+        <div class="board-main">
+            <div class="tabuleiro theme-green pieces-setClassico" id="chess-board">
+            </div>
+            
+            <div class="captured-pieces">
+                <div class="captured-white">
+                    <h4>Brancas Capturadas:</h4>
+                    <div id="captured-white-pieces"></div>
+                </div>
+                <div class="captured-black">
+                    <h4>Pretas Capturadas:</h4>
+                    <div id="captured-black-pieces"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- tela promoção de peão -->
+        <div id="fundo" class="fundo" style="display: none;"></div>
+        <div id="escolhebranco" class="escolhe" style="display: none;">
+            <div onclick="escolhe('rainha','branco');" data-piece="q" data-color="w"></div>
+            <div onclick="escolhe('torre','branco');" data-piece="r" data-color="w"></div>
+            <div onclick="escolhe('cavalo','branco');" data-piece="n" data-color="w"></div>
+            <div onclick="escolhe('bispo','branco');" data-piece="b" data-color="w"></div>
+        </div>
+        <div id="escolhepreto" class="escolhe" style="display: none;">
+            <div onclick="escolhe('rainha','preto');" data-piece="q" data-color="b"></div>
+            <div onclick="escolhe('torre','preto');" data-piece="r" data-color="b"></div>
+            <div onclick="escolhe('cavalo','preto');" data-piece="n" data-color="b"></div>
+            <div onclick="escolhe('bispo','preto');" data-piece="b" data-color="b"></div>
+        </div>
+        
+        <!-- Modal de fim de jogo -->
+        <div id="game-end-modal" class="game-end-modal" style="display: none;">
+            <div class="game-end-content">
+                <div class="game-end-icon">🏆</div>
+                <h2 id="game-end-title">Vitória!</h2>
+                <p id="game-end-message"></p>
+                <button onclick="closeGameEndModal()" class="game-end-button">OK</button>
+            </div>
+        </div>
+    </div>
+    
+    <script src="/js/tabuleiro-online.js"></script>
+    <script>
+        // Variáveis do jogo
+        let game = null;
+        let selectedSquare = null;
+        let validMoves = [];
+        // onlineRoomId, onlinePlayer, onlineOpponent, isMyTurn são declarados em tabuleiro-online.js como variáveis globais
+
+        // Funções para tocar sons
+        function playMoveSound() {
+            const audio = new Audio('/sounds/move-self.mp3');
+            audio.volume = 0.5;
+            audio.play().catch(err => {});
+        }
+
+        function playCaptureSound() {
+            const audio = new Audio('/sounds/capture.mp3');
+            audio.volume = 0.5;
+            audio.play().catch(err => {});
+        }
+
+        function playGameEndSound() {
+            const audio = new Audio('/sounds/game-end.mp3');
+            audio.volume = 0.5;
+            audio.play().catch(err => {});
+        }
+
+        // Obter roomId da URL
+        function getRoomIdFromURL() {
+            const params = new URLSearchParams(window.location.search);
+            return params.get('roomId');
+        }
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            // Verifica autenticação
+            try {
+                const auth = await AuthAPI.checkAuth();
+                if (!auth.authenticated) {
+                    alert('Você precisa estar logado para jogar online!');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                // Carregar avatar
+                try {
+                    const profile = await ProfileAPI.getProfile();
+                    const headerAvatar = document.getElementById('header-avatar');
+                    const avatarNav = document.getElementById('user-avatar-nav');
+                    
+                    if (avatarNav && headerAvatar) {
+                        avatarNav.style.display = 'inline-block';
+                        if (profile.foto) {
+                            headerAvatar.innerHTML = `<img src="${profile.foto}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+                        } else {
+                            const initial = profile.username ? profile.username.charAt(0).toUpperCase() : '?';
+                            headerAvatar.textContent = initial;
+                        }
+                    }
+                } catch (error) {
+                }
+
+                // Obter roomId da URL
+                const roomId = getRoomIdFromURL();
+                if (!roomId) {
+                    alert('ID da sala não encontrado!');
+                    window.location.href = 'lobby.html';
+                    return;
+                }
+
+                onlineRoomId = roomId;
+
+                // Configurar callbacks do Socket.io
+                setupOnlineGameCallbacks();
+
+                // Inicializar jogo vazio para mostrar o tabuleiro (posição inicial)
+                game = new ChessGame();
+                renderBoard();
+                updateGameInfo();
+                updateCapturedPieces();
+
+                // Entrar na sala
+                SocketAPI.joinRoom(roomId);
+                // Não solicitar estado do jogo imediatamente - aguardar evento room-joined
+
+                // Carregar temas
+                let savedBoardTheme = localStorage.getItem('boardTheme') || 'green';
+                let savedPiecesTheme = localStorage.getItem('piecesTheme') || 'setClassico';
+                
+                const boardThemeEl = document.getElementById('board-theme');
+                const piecesThemeEl = document.getElementById('pieces-theme');
+                
+                if (boardThemeEl) boardThemeEl.value = savedBoardTheme;
+                if (piecesThemeEl) piecesThemeEl.value = savedPiecesTheme;
+                
+                if (typeof changeBoardTheme === 'function') changeBoardTheme();
+                if (typeof changePiecesTheme === 'function') changePiecesTheme();
+                if (typeof updatePromotionModal === 'function') updatePromotionModal();
+            } catch (error) {
+                alert('Erro ao conectar. Redirecionando...');
+                window.location.href = 'lobby.html';
+            }
+        });
+
+        // Configurar callbacks do Socket.io
+        function setupOnlineGameCallbacks() {
+            // Tratamento de erros do Socket.io
+            window.onSocketError = (error) => {
+                const errorMessage = error.message || error.error || 'Erro de conexão';
+                
+                // Trata erros específicos
+                if (errorMessage.includes('não está disponível') || errorMessage.includes('não encontrada')) {
+                    showMessage('Sala não encontrada ou indisponível. Redirecionando...', 'error');
+                    setTimeout(() => {
+                        window.location.href = 'lobby.html';
+                    }, 2000);
+                } else if (errorMessage.includes('cheia')) {
+                    showMessage('Esta sala já está cheia. Redirecionando...', 'error');
+                    setTimeout(() => {
+                        window.location.href = 'lobby.html';
+                    }, 2000);
+                } else {
+                    showMessage(errorMessage, 'error');
+                }
+            };
+            
+            window.onRoomJoined = (data) => {
+                onlineRoomId = data.roomId;
+                onlinePlayer = data.player;
+                onlineOpponent = data.opponent;
+                
+                // Aplica rotação quando a cor do jogador é identificada
+                applyBoardRotation();
+                
+                // Se já há dois jogadores e o jogo começou, inicializa o jogo
+                if (data.status === 'playing' && data.gameState && onlineOpponent) {
+                    isMyTurn = data.player && data.player.color === data.gameState.currentPlayer;
+                    const gameState = data.gameState || {
+                        currentPlayer: 'branco',
+                        gameState: 'playing',
+                        moveHistory: [],
+                        capturedPieces: { branco: [], preto: [] }
+                    };
+                    initializeOnlineGame(gameState);
+                    updateOnlineGameInfo();
+                    showMessage('Jogo já em andamento!', 'info');
+                } else {
+                    // Ainda aguardando oponente
+                    updateOnlineGameInfo();
+                    if (onlineOpponent) {
+                        showMessage('Aguardando início do jogo...', 'info');
+                    } else {
+                        showMessage('Conectado à sala! Aguardando oponente...', 'info');
+                    }
+                }
+            };
+
+            window.onOpponentJoined = (data) => {
+                // Solicitar estado atualizado do jogo, pois pode ter mudado para 'playing'
+                if (onlineRoomId) {
+                    SocketAPI.requestGameState(onlineRoomId);
+                }
+                updateOnlineGameInfo();
+            };
+
+            window.onGameStarted = (data) => {
+                const mySocketId = SocketAPI.getSocketId();
+                onlinePlayer = data.player1?.socketId === mySocketId ? data.player1 : data.player2;
+                onlineOpponent = data.player1?.socketId === mySocketId ? data.player2 : data.player1;
+                
+                isMyTurn = onlinePlayer && onlinePlayer.color === 'branco';
+                
+                
+                // Inicializar jogo com estado do servidor ou estado inicial
+                const gameState = data.gameState || {
+                    currentPlayer: 'branco',
+                    gameState: 'playing',
+                    moveHistory: [],
+                    capturedPieces: { branco: [], preto: [] }
+                };
+                
+                initializeOnlineGame(gameState);
+                updateOnlineGameInfo();
+                // Aplica rotação após definir a cor do jogador
+                applyBoardRotation();
+                showMessage('Jogo iniciado!', 'success');
+            };
+
+            window.onMoveMade = (data) => {
+                // Verifica se o movimento já foi aplicado localmente (otimistic update)
+                const moveKey = `${data.move.fromRow}-${data.move.fromCol}-${data.move.toRow}-${data.move.toCol}`;
+                let shouldApply = true;
+                
+                if (game && game.moveHistory.length > 0) {
+                    const lastMove = game.moveHistory[game.moveHistory.length - 1];
+                    const lastMoveKey = `${lastMove.from.row}-${lastMove.from.col}-${lastMove.to.row}-${lastMove.to.col}`;
+                    
+                    // Se é o mesmo movimento que acabamos de fazer, não aplica novamente
+                    if (lastMoveKey === moveKey) {
+                        shouldApply = false;
+                    }
+                }
+                
+                // Só aplica se não for o movimento que acabamos de fazer
+                if (shouldApply) {
+                    applyOnlineMove(data.move);
+                    // Após aplicar o movimento, atualiza o estado do jogo localmente
+                    if (game) {
+                        game.updateGameState();
+                    }
+                }
+                
+                if (game) {
+                    // Atualiza o estado do jogo com os dados do servidor, mas se o servidor não detectou
+                    // checkmate, usa o estado local após aplicar o movimento
+                    const serverGameState = data.gameState.gameState;
+                    const localGameState = game.gameState;
+                    
+                    // Prefere o estado do servidor se for checkmate/stalemate, senão usa o local
+                    if (serverGameState === 'checkmate' || serverGameState === 'stalemate') {
+                        game.gameState = serverGameState;
+                    } else if (localGameState === 'checkmate' || localGameState === 'stalemate') {
+                        game.gameState = localGameState;
+                    } else {
+                        game.gameState = serverGameState || localGameState;
+                    }
+                    
+                    game.currentPlayer = data.currentPlayer;
+                    // Não sobrescreve capturedPieces se o servidor não enviar dados válidos
+                    // O cliente já rastreia isso corretamente através do movePiece
+                    if (data.gameState.capturedPieces && 
+                        (data.gameState.capturedPieces.branco?.length > 0 || 
+                         data.gameState.capturedPieces.preto?.length > 0)) {
+                        game.capturedPieces = data.gameState.capturedPieces;
+                    }
+                    
+                    // Verifica se o jogo terminou após receber o movimento
+                    // Verifica tanto o estado recebido do servidor quanto o estado local após aplicar o movimento
+                    const finalGameState = game.gameState;
+                    if (finalGameState === 'checkmate' || finalGameState === 'stalemate') {
+                        playGameEndSound();
+                        setTimeout(() => {
+                            if (finalGameState === 'checkmate') {
+                                // O vencedor é o jogador que NÃO está no turno atual (quem fez o movimento ganhou)
+                                const winnerColor = data.currentPlayer === 'branco' ? 'preto' : 'branco';
+                                showGameEndModal('checkmate', winnerColor);
+                            } else if (finalGameState === 'stalemate') {
+                                showGameEndModal('stalemate', null);
+                            }
+                        }, 500);
+                    }
+                }
+                isMyTurn = onlinePlayer && onlinePlayer.color === data.currentPlayer;
+                
+                renderBoard();
+                updateGameInfo();
+                updateCapturedPieces();
+                updateOnlineGameInfo();
+            };
+
+            window.onOpponentLeft = (data) => {
+                showMessage('Oponente desconectou. Redirecionando...', 'error');
+                setTimeout(() => {
+                    window.location.href = 'lobby.html';
+                }, 3000);
+            };
+
+            window.onGameStateUpdated = (data) => {
+                const mySocketId = SocketAPI.getSocketId();
+                onlinePlayer = data.player1?.socketId === mySocketId ? data.player1 : data.player2;
+                onlineOpponent = data.player1?.socketId === mySocketId ? data.player2 : data.player1;
+                isMyTurn = onlinePlayer && onlinePlayer.color === data.gameState.currentPlayer;
+                
+                // Aplica rotação quando a cor do jogador é atualizada
+                applyBoardRotation();
+                
+                initializeOnlineGame(data.gameState);
+                updateOnlineGameInfo();
+            };
+        }
+
+        // Inicializar jogo online
+        function initializeOnlineGame(gameState) {
+            try {
+                game = new ChessGame();
+                
+                if (gameState) {
+                    game.currentPlayer = gameState.currentPlayer || 'branco';
+                    game.gameState = gameState.gameState || 'playing';
+                    // Inicializa capturedPieces apenas se não existir ou se o servidor enviar dados válidos
+                    if (!game.capturedPieces) {
+                        game.capturedPieces = { branco: [], preto: [] };
+                    }
+                    if (gameState.capturedPieces && 
+                        (gameState.capturedPieces.branco?.length > 0 || 
+                         gameState.capturedPieces.preto?.length > 0)) {
+                        game.capturedPieces = gameState.capturedPieces;
+                    }
+                    
+                    // Aplicar movimentos do histórico para reconstruir tabuleiro
+                    if (gameState.moveHistory && Array.isArray(gameState.moveHistory) && gameState.moveHistory.length > 0) {
+                        for (const move of gameState.moveHistory) {
+                            try {
+                                game.movePiece(move.fromRow, move.fromCol, move.toRow, move.toCol);
+                            } catch (error) {
+                            }
+                        }
+                    } else {
+                        // Jogo começa do zero - ChessGame já inicializa o tabuleiro com as peças
+                    }
+                } else {
+                    // Jogo começa do zero - ChessGame já inicializa o tabuleiro com as peças
+                }
+                
+                renderBoard();
+                updateGameInfo();
+                updateCapturedPieces();
+            } catch (error) {
+                showMessage('Erro ao inicializar jogo: ' + error.message, 'error');
+            }
+        }
+
+        // Aplicar movimento recebido
+        function applyOnlineMove(move) {
+            if (!game || !move) {
+                return;
+            }
+            
+            try {
+                const success = game.movePiece(
+                    move.fromRow,
+                    move.fromCol,
+                    move.toRow,
+                    move.toCol
+                );
+                
+                if (success) {
+                    // Verifica se houve captura
+                    if (move.capturedPiece) {
+                        playCaptureSound();
+                    } else {
+                        playMoveSound();
+                    }
+                    
+                    renderBoard();
+                    updateGameInfo();
+                    updateCapturedPieces();
+                } else {
+                }
+            } catch (error) {
+                showMessage('Erro ao processar movimento', 'error');
+            }
+        }
+
+        // Atualizar informações do jogo online
+        function updateOnlineGameInfo() {
+            const currentPlayerElement = document.getElementById('current-player');
+            const gameStateElement = document.getElementById('game-state');
+            const opponentInfo = document.getElementById('opponent-info');
+            
+            if (currentPlayerElement && game) {
+                const playerText = game.currentPlayer === 'branco' ? 'Brancas' : 'Pretas';
+                currentPlayerElement.textContent = `Vez das ${playerText}`;
+                
+                if (isMyTurn) {
+                    currentPlayerElement.style.color = '#27ae60';
+                } else {
+                    currentPlayerElement.style.color = '#e74c3c';
+                }
+            }
+            
+            if (gameStateElement && game) {
+                let stateText = 'Jogando';
+                if (game.gameState === 'check') {
+                    stateText = 'Xeque!';
+                } else if (game.gameState === 'checkmate') {
+                    stateText = 'Xeque-mate!';
+                    playGameEndSound();
+                    // Mostra modal de vitória após um pequeno delay
+                    setTimeout(() => {
+                        const winnerColor = game.currentPlayer === 'branco' ? 'preto' : 'branco';
+                        showGameEndModal('checkmate', winnerColor);
+                    }, 500);
+                } else if (game.gameState === 'stalemate') {
+                    stateText = 'Empate por afogamento';
+                    playGameEndSound();
+                    // Mostra modal de empate após um pequeno delay
+                    setTimeout(() => {
+                        showGameEndModal('stalemate', null);
+                    }, 500);
+                }
+                gameStateElement.textContent = stateText;
+            }
+            
+            if (opponentInfo) {
+                if (onlineOpponent) {
+                    opponentInfo.innerHTML = `
+                        <strong>Oponente:</strong> ${onlineOpponent.username}<br>
+                        <strong>Você:</strong> ${onlinePlayer?.username || 'Carregando...'} (${onlinePlayer?.color || ''})
+                    `;
+                } else {
+                    opponentInfo.innerHTML = '<strong>Aguardando oponente...</strong>';
+                }
+            }
+            
+            // Aplica rotação do tabuleiro baseado na cor do jogador
+            applyBoardRotation();
+        }
+
+        // Funções do tabuleiro (reutilizadas do tabuleiro.html)
+        function getPieceImagePath(piece, theme) {
+            if (!theme || !theme.startsWith('set')) {
+                return null;
+            }
+            
+            const color = piece.color === 'branco' ? 'w' : 'b';
+            const pieceMap = {
+                'King': 'k',
+                'Queen': 'q',
+                'Rook': 'r',
+                'Bishop': 'b',
+                'Knight': 'n',
+                'Pawn': 'p'
+            };
+            
+            const pieceCode = pieceMap[piece.constructor.name] || 'p';
+            return `/images/${theme}/${color}${pieceCode}.png`;
+        }
+
+        // Função para aplicar rotação do tabuleiro baseado na cor do jogador
+        function applyBoardRotation() {
+            const board = document.getElementById('chess-board');
+            
+            if (!board) return;
+            
+            // Se o jogador está jogando com pretas, rotaciona o tabuleiro 180 graus
+            if (onlinePlayer && onlinePlayer.color === 'preto') {
+                board.classList.add('rotated');
+            } else {
+                board.classList.remove('rotated');
+            }
+        }
+
+        function renderBoard() {
+            const board = document.getElementById('chess-board');
+            if (!board) {
+                return;
+            }
+            
+            if (!game) {
+                return;
+            }
+            
+            const currentBoardTheme = document.getElementById('board-theme')?.value || 'green';
+            const currentPiecesTheme = document.getElementById('pieces-theme')?.value || 'setClassico';
+            
+            board.classList.remove('theme-classic', 'theme-dark', 'theme-modern', 'theme-vintage', 'theme-green', 'theme-brown', 'theme-azul');
+            board.classList.remove('pieces-setClassico', 'pieces-setMadeira', 'pieces-setVidro');
+            
+            board.classList.add('theme-' + currentBoardTheme);
+            board.classList.add('pieces-' + currentPiecesTheme);
+            
+            // Aplica rotação baseado na cor do jogador
+            applyBoardRotation();
+            
+            board.innerHTML = '';
+
+            // Determina se deve inverter a ordem de renderização
+            const isRotated = onlinePlayer && onlinePlayer.color === 'preto';
+            
+            for (let row = 1; row <= 8; row++) {
+                for (let col = 1; col <= 8; col++) {
+                    const square = document.createElement('div');
+                    const isWhite = (row + col) % 2 === 0;
+                    square.className = `casa ${isWhite ? 'branca' : 'preta'}`;
+                    square.id = `t${row}${col}`;
+                    square.dataset.row = row;
+                    square.dataset.col = col;
+                    
+                    // Salva as coordenadas lógicas do jogo
+                    square.dataset.logicalRow = row;
+                    square.dataset.logicalCol = col;
+                    
+                    square.addEventListener('click', function() {
+                        // Usa as coordenadas lógicas salvas
+                        const logicalRow = parseInt(square.dataset.logicalRow);
+                        const logicalCol = parseInt(square.dataset.logicalCol);
+                        handleSquareClick(logicalRow, logicalCol);
+                    });
+
+                    const piece = game ? game.getPiece(row, col) : null;
+                    if (piece) {
+                        const imagePath = getPieceImagePath(piece, currentPiecesTheme);
+                        if (imagePath) {
+                            const img = document.createElement('img');
+                            img.src = imagePath;
+                            img.alt = piece.constructor.name;
+                            img.className = 'chess-piece-image';
+                            square.appendChild(img);
+                        } else {
+                            square.innerHTML = piece.getSymbol();
+                        }
+                        square.classList.add('has-piece');
+                    }
+
+                    if (validMoves.some(move => move.row === row && move.col === col)) {
+                        square.classList.add('valid-move');
+                    }
+
+                    if (selectedSquare && selectedSquare.row === row && selectedSquare.col === col) {
+                        square.classList.add('selected');
+                    }
+
+                    board.appendChild(square);
+                }
+            }
+        }
+
+        function handleSquareClick(row, col) {
+            // Verifica se é a vez do jogador
+            if (!isMyTurn) {
+                showMessage('Aguarde sua vez!', 'error');
+                return;
+            }
+
+            const piece = game.getPiece(row, col);
+
+            if (!selectedSquare) {
+                if (piece && piece.color === onlinePlayer.color && piece.color === game.currentPlayer) {
+                    selectedSquare = { row, col };
+                    validMoves = getValidMoves(row, col);
+                    renderBoard();
+                }
+            } else {
+                if (selectedSquare.row === row && selectedSquare.col === col) {
+                    selectedSquare = null;
+                    validMoves = [];
+                    renderBoard();
+                } else if (validMoves.some(move => move.row === row && move.col === col)) {
+                    makeOnlineMove(selectedSquare.row, selectedSquare.col, row, col);
+                } else if (piece && piece.color === onlinePlayer.color) {
+                    selectedSquare = { row, col };
+                    validMoves = getValidMoves(row, col);
+                    renderBoard();
+                } else {
+                    selectedSquare = null;
+                    validMoves = [];
+                    renderBoard();
+                }
+            }
+        }
+
+        function getValidMoves(row, col) {
+            const moves = [];
+            for (let toRow = 1; toRow <= 8; toRow++) {
+                for (let toCol = 1; toCol <= 8; toCol++) {
+                    if (game.isValidMove(row, col, toRow, toCol)) {
+                        moves.push({ row: toRow, col: toCol });
+                    }
+                }
+            }
+            return moves;
+        }
+
+        function makeOnlineMove(fromRow, fromCol, toRow, toCol) {
+            if (!isMyTurn) {
+                showMessage('Não é sua vez!', 'error');
+                return false;
+            }
+
+            if (!onlineRoomId) {
+                showMessage('Você não está em uma sala', 'error');
+                return false;
+            }
+
+            // Valida movimento localmente primeiro
+            if (!game.isValidMove(fromRow, fromCol, toRow, toCol)) {
+                showMessage('Movimento inválido!', 'error');
+                return false;
+            }
+
+            const piece = game.getPiece(fromRow, fromCol);
+            const capturedPiece = game.getPiece(toRow, toCol);
+            
+            if (capturedPiece && capturedPiece.constructor.name === 'King') {
+                return false;
+            }
+
+            // Envia movimento para o servidor
+            SocketAPI.makeMove(onlineRoomId, fromRow, fromCol, toRow, toCol);
+            
+            // Aplica movimento localmente (otimistic update)
+            const success = game.movePiece(fromRow, fromCol, toRow, toCol);
+            if (success) {
+                if (capturedPiece) {
+                    playCaptureSound();
+                } else {
+                    playMoveSound();
+                }
+                
+                selectedSquare = null;
+                validMoves = [];
+                isMyTurn = false; // Aguarda confirmação do servidor
+                renderBoard();
+                updateGameInfo();
+                updateCapturedPieces();
+                updateOnlineGameInfo();
+
+                // Promoção de peão
+                if (piece && piece.constructor.name === 'Pawn') {
+                    if ((piece.color === 'branco' && toRow === 1) || 
+                        (piece.color === 'preto' && toRow === 8)) {
+                        xe = toRow;
+                        ye = toCol;
+                        const cor = piece.color;
+                        updatePromotionModal();
+                        document.getElementById('escolhe' + cor).style.display = 'block';
+                        document.getElementById('fundo').style.display = 'block';
+                    }
+                }
+                
+                return true;
+            }
+            
+            return false;
+        }
+
+        function updateGameInfo() {
+            const currentPlayerElement = document.getElementById('current-player');
+            const gameStateElement = document.getElementById('game-state');
+            
+            if (!game) return;
+            
+            const playerText = game.currentPlayer === 'branco' ? 'Brancas' : 'Pretas';
+            if (currentPlayerElement) {
+                currentPlayerElement.textContent = `Vez das ${playerText}`;
+            }
+            
+            let stateText = 'Jogando';
+            if (game.gameState === 'check') {
+                stateText = 'Xeque!';
+            } else if (game.gameState === 'checkmate') {
+                stateText = 'Xeque-mate!';
+                // Mostra modal de vitória após um pequeno delay
+                setTimeout(() => {
+                    const winnerColor = game.currentPlayer === 'branco' ? 'preto' : 'branco';
+                    showGameEndModal('checkmate', winnerColor);
+                }, 500);
+            } else if (game.gameState === 'stalemate') {
+                stateText = 'Empate por afogamento';
+                // Mostra modal de empate após um pequeno delay
+                setTimeout(() => {
+                    showGameEndModal('stalemate', null);
+                }, 500);
+            }
+            
+            if (gameStateElement) {
+                gameStateElement.textContent = stateText;
+            }
+        }
+
+        function updateCapturedPieces() {
+            if (!game) return;
+            
+            const whiteCaptured = document.getElementById('captured-white-pieces');
+            const blackCaptured = document.getElementById('captured-black-pieces');
+            const currentPiecesTheme = document.getElementById('pieces-theme')?.value || 'setClassico';
+            
+            const renderPiece = (piece) => {
+                const imagePath = getPieceImagePath(piece, currentPiecesTheme);
+                if (imagePath) {
+                    return `<img src="${imagePath}" alt="${piece.constructor.name}" class="captured-piece" style="width: 1.5em; height: 1.5em; display: inline-block; margin: 0 2px;">`;
+                } else {
+                    return piece.getSymbol();
+                }
+            };
+            
+            if (whiteCaptured) {
+                whiteCaptured.innerHTML = game.capturedPieces.branco.map(renderPiece).join(' ');
+            }
+            if (blackCaptured) {
+                blackCaptured.innerHTML = game.capturedPieces.preto.map(renderPiece).join(' ');
+            }
+        }
+
+        function updatePromotionModal() {
+            const currentPiecesTheme = document.getElementById('pieces-theme')?.value || 'setClassico';
+            const whiteModal = document.getElementById('escolhebranco');
+            const blackModal = document.getElementById('escolhepreto');
+            
+            const pieceSymbols = {
+                'q': { unicode: { w: '&#9813;', b: '&#9819;' }, name: 'rainha' },
+                'r': { unicode: { w: '&#9814;', b: '&#9820;' }, name: 'torre' },
+                'n': { unicode: { w: '&#9816;', b: '&#9822;' }, name: 'cavalo' },
+                'b': { unicode: { w: '&#9815;', b: '&#9821;' }, name: 'bispo' }
+            };
+            
+            const updateModal = (modal, color) => {
+                const pieces = modal.querySelectorAll('[data-piece]');
+                pieces.forEach(div => {
+                    const pieceCode = div.dataset.piece;
+                    const colorCode = div.dataset.color;
+                    const imagePath = currentPiecesTheme.startsWith('set') 
+                        ? `/images/${currentPiecesTheme}/${colorCode}${pieceCode}.png` 
+                        : null;
+                    
+                    if (imagePath) {
+                        div.innerHTML = `<img src="${imagePath}" alt="${pieceSymbols[pieceCode].name}" style="width: 100%; height: 100%; object-fit: contain;">`;
+                    } else {
+                        div.innerHTML = pieceSymbols[pieceCode].unicode[colorCode];
+                    }
+                });
+            };
+            
+            updateModal(whiteModal, 'w');
+            updateModal(blackModal, 'b');
+        }
+
+        let xe, ye;
+
+        function escolhe(pecae, core) {
+            let newPiece;
+            const color = core === 'branco' ? 'branco' : 'preto';
+            
+            switch(pecae) {
+                case 'rainha':
+                    newPiece = new Queen(color, xe, ye);
+                    break;
+                case 'torre':
+                    newPiece = new Rook(color, xe, ye);
+                    break;
+                case 'cavalo':
+                    newPiece = new Knight(color, xe, ye);
+                    break;
+                case 'bispo':
+                    newPiece = new Bishop(color, xe, ye);
+                    break;
+            }
+            
+            game.board[xe][ye] = newPiece;
+            
+            renderBoard();
+            updateGameInfo();
+            
+            document.getElementById('escolhe' + core).style.display = 'none';
+            document.getElementById('fundo').style.display = 'none';
+        }
+
+        function changeBoardTheme() {
+            const themeSelect = document.getElementById('board-theme');
+            const board = document.getElementById('chess-board');
+            
+            if (!themeSelect || !board) return;
+            
+            const theme = themeSelect.value || 'green';
+            
+            board.classList.remove('theme-classic', 'theme-dark', 'theme-modern', 'theme-vintage', 'theme-green', 'theme-brown', 'theme-azul');
+            board.classList.add('theme-' + theme);
+            
+            localStorage.setItem('boardTheme', theme);
+        }
+
+        function changePiecesTheme() {
+            const themeSelect = document.getElementById('pieces-theme');
+            const board = document.getElementById('chess-board');
+            
+            if (!themeSelect || !board) return;
+            
+            const theme = themeSelect.value || 'setClassico';
+            
+            board.classList.remove('pieces-setClassico', 'pieces-setMadeira', 'pieces-setVidro');
+            board.classList.add('pieces-' + theme);
+            
+            localStorage.setItem('piecesTheme', theme);
+            
+            updatePromotionModal();
+            
+            if (game) {
+                renderBoard();
+                updateCapturedPieces();
+            }
+        }
+
+        function leaveOnlineGame() {
+            if (confirm('Deseja realmente sair da partida?')) {
+                stopVideochat();
+                if (onlineRoomId) {
+                    SocketAPI.leaveRoom(onlineRoomId);
+                }
+                window.location.href = 'lobby.html';
+            }
+        }
+
+        function showMessage(message, type) {
+            const messageDiv = document.getElementById('online-message');
+            if (messageDiv) {
+                messageDiv.textContent = message;
+                messageDiv.className = `online-message ${type}`;
+                messageDiv.style.display = 'block';
+                
+                if (type === 'success' || type === 'info') {
+                    setTimeout(() => {
+                        messageDiv.style.display = 'none';
+                    }, 3000);
+                }
+            }
+        }
+        
+        // Funções para o modal de fim de jogo
+        function showGameEndModal(resultType, winnerColor) {
+            const modal = document.getElementById('game-end-modal');
+            const title = document.getElementById('game-end-title');
+            const message = document.getElementById('game-end-message');
+            
+            if (!modal || !title || !message) return;
+            
+            if (resultType === 'checkmate' && winnerColor) {
+                // Verifica se o jogador atual ganhou ou perdeu
+                const isCurrentPlayerWinner = onlinePlayer && onlinePlayer.color === winnerColor;
+                const colorText = winnerColor === 'branco' ? 'Brancas' : 'Pretas';
+                
+                if (isCurrentPlayerWinner) {
+                    // Jogador atual ganhou
+                    title.textContent = 'Vitória! 🏆';
+                    message.textContent = `Parabéns! Você (${colorText}) venceu!`;
+                } else {
+                    // Jogador atual perdeu
+                    title.textContent = 'Derrota! 😔';
+                    const winner = onlineOpponent && onlineOpponent.username ? onlineOpponent.username : 'Seu oponente';
+                    message.textContent = `${winner} (${colorText}) venceu. Você perdeu.`;
+                }
+            } else if (resultType === 'stalemate') {
+                title.textContent = 'Empate! 🤝';
+                message.textContent = 'O jogo terminou em empate por afogamento.';
+            }
+            
+            modal.style.display = 'flex';
+        }
+        
+        function closeGameEndModal() {
+            const modal = document.getElementById('game-end-modal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+
+        // ========== CONTROLES DE ÁUDIO ==========
+        
+        let videochatAudioEnabled = true;
+        let soundsAudioEnabled = true;
+
+        function toggleVideochatAudio() {
+            videochatAudioEnabled = document.getElementById('audio-videochat-toggle').checked;
+            const remoteVideo = document.getElementById('remote-video');
+            if (remoteVideo) {
+                remoteVideo.muted = !videochatAudioEnabled;
+            }
+        }
+
+        function toggleSoundsAudio() {
+            soundsAudioEnabled = document.getElementById('audio-sounds-toggle').checked;
+        }
+
+        // Sobrescrever as funções de som para respeitar o toggle
+        const originalPlayMoveSound = playMoveSound;
+        const originalPlayCaptureSound = playCaptureSound;
+        const originalPlayGameEndSound = playGameEndSound;
+
+        window.playMoveSound = function() {
+            if (soundsAudioEnabled && typeof originalPlayMoveSound === 'function') {
+                originalPlayMoveSound();
+            }
+        };
+
+        window.playCaptureSound = function() {
+            if (soundsAudioEnabled && typeof originalPlayCaptureSound === 'function') {
+                originalPlayCaptureSound();
+            }
+        };
+
+        window.playGameEndSound = function() {
+            if (soundsAudioEnabled && typeof originalPlayGameEndSound === 'function') {
+                originalPlayGameEndSound();
+            }
+        };
+
+        // ========== VÍDEOCHAT (WebRTC) ==========
+        
+        let localStream = null;
+        let remoteStream = null;
+        let peerConnection = null;
+        let isVideochatActive = false;
+        let videochatInvitePending = false;
+        let localVideoEnabled = true;
+        let localAudioEnabled = true;
+        let remoteVideoVisible = true;
+        let remoteAudioEnabled = true;
+        const configuration = {
+            iceServers: [
+                { urls: 'stun:stun.l.google.com:19302' }
+            ]
+        };
+
+        // Enviar convite para videochamada
+        function sendVideochatInvite() {
+            if (!onlineRoomId || !onlineOpponent) {
+                showMessage('Aguarde um oponente para iniciar o vídeochat', 'error');
+                return;
+            }
+
+            if (isVideochatActive) {
+                stopVideochat();
+                return;
+            }
+
+            SocketAPI.sendVideochatInvite(onlineRoomId);
+            videochatInvitePending = true;
+            document.getElementById('videochat-toggle-btn').textContent = 'Aguardando resposta...';
+            document.getElementById('videochat-toggle-btn').disabled = true;
+            showMessage('Convite enviado! Aguardando resposta do oponente...', 'info');
+        }
+
+        // Aceitar convite de videochamada
+        async function acceptVideochatInvite() {
+            if (!onlineRoomId) return;
+            
+            SocketAPI.acceptVideochatInvite(onlineRoomId);
+            document.getElementById('videochat-invite-status').style.display = 'none';
+            await startVideochat();
+        }
+
+        // Rejeitar convite de videochamada
+        function rejectVideochatInvite() {
+            if (!onlineRoomId) return;
+            
+            SocketAPI.rejectVideochatInvite(onlineRoomId);
+            document.getElementById('videochat-invite-status').style.display = 'none';
+            showMessage('Convite rejeitado', 'info');
+        }
+
+        // Callbacks de convite
+        window.onVideochatInviteReceived = (data) => {
+            const statusDiv = document.getElementById('videochat-invite-status');
+            const statusText = document.getElementById('invite-status-text');
+            const inviteButtons = document.getElementById('invite-buttons');
+            
+            statusText.textContent = `${data.fromUsername} convidou você para uma videochamada`;
+            inviteButtons.style.display = 'flex';
+            statusDiv.style.display = 'block';
+            showMessage(`${data.fromUsername} convidou você para uma videochamada`, 'info');
+        };
+
+        window.onVideochatAccepted = async (data) => {
+            videochatInvitePending = false;
+            document.getElementById('videochat-toggle-btn').textContent = 'Convidar para Vídeochat';
+            document.getElementById('videochat-toggle-btn').disabled = false;
+            await startVideochat();
+            showMessage('Convite aceito! Iniciando videochamada...', 'success');
+        };
+
+        window.onVideochatRejected = (data) => {
+            videochatInvitePending = false;
+            document.getElementById('videochat-toggle-btn').textContent = 'Convidar para Vídeochat';
+            document.getElementById('videochat-toggle-btn').disabled = false;
+            showMessage('Convite rejeitado pelo oponente', 'error');
+        };
+
+        async function startVideochat() {
+            if (!onlineRoomId || !onlineOpponent) {
+                showMessage('Aguarde um oponente para iniciar o vídeochat', 'error');
+                return;
+            }
+
+            try {
+                // Obter stream de mídia (webcam + áudio)
+                localStream = await navigator.mediaDevices.getUserMedia({
+                    video: true,
+                    audio: true
+                });
+
+                const localVideo = document.getElementById('local-video');
+                localVideo.srcObject = localStream;
+                localVideo.muted = true; // Sempre mudo no local para evitar feedback
+
+                // Criar peer connection
+                peerConnection = new RTCPeerConnection(configuration);
+
+                // Adicionar track local
+                localStream.getTracks().forEach(track => {
+                    peerConnection.addTrack(track, localStream);
+                });
+
+                // Receber track remoto
+                peerConnection.ontrack = (event) => {
+                    remoteStream = event.streams[0];
+                    const remoteVideo = document.getElementById('remote-video');
+                    remoteVideo.srcObject = remoteStream;
+                    remoteVideo.muted = !remoteAudioEnabled;
+                };
+
+                // ICE candidate handling
+                peerConnection.onicecandidate = (event) => {
+                    if (event.candidate) {
+                        SocketAPI.sendWebRTCICECandidate(onlineRoomId, event.candidate);
+                    }
+                };
+
+                // Criar e enviar offer
+                const offer = await peerConnection.createOffer();
+                await peerConnection.setLocalDescription(offer);
+                SocketAPI.sendWebRTCOffer(onlineRoomId, offer);
+
+                isVideochatActive = true;
+                document.getElementById('videochat-toggle-btn').textContent = 'Convidar para Vídeochat';
+                document.getElementById('videochat-toggle-btn').disabled = false;
+                document.getElementById('videochat-videos').style.display = 'flex';
+                document.getElementById('videochat-invite-status').style.display = 'none';
+                showMessage('Vídeochat iniciado', 'success');
+            } catch (error) {
+                showMessage('Erro ao acessar câmera/microfone. Verifique as permissões.', 'error');
+            }
+        }
+
+        function stopVideochat() {
+            if (localStream) {
+                localStream.getTracks().forEach(track => track.stop());
+                localStream = null;
+            }
+
+            if (peerConnection) {
+                peerConnection.close();
+                peerConnection = null;
+            }
+
+            const localVideo = document.getElementById('local-video');
+            const remoteVideo = document.getElementById('remote-video');
+            if (localVideo) localVideo.srcObject = null;
+            if (remoteVideo) remoteVideo.srcObject = null;
+
+            isVideochatActive = false;
+            videochatInvitePending = false;
+            document.getElementById('videochat-toggle-btn').textContent = 'Convidar para Vídeochat';
+            document.getElementById('videochat-toggle-btn').disabled = false;
+            document.getElementById('videochat-videos').style.display = 'none';
+            document.getElementById('videochat-invite-status').style.display = 'none';
+            
+            // Resetar estados
+            localVideoEnabled = true;
+            localAudioEnabled = true;
+            remoteVideoVisible = true;
+            remoteAudioEnabled = true;
+        }
+
+        // Controles de vídeo e áudio
+        function toggleLocalVideo() {
+            if (!localStream) return;
+            
+            const videoTrack = localStream.getVideoTracks()[0];
+            if (videoTrack) {
+                localVideoEnabled = !localVideoEnabled;
+                videoTrack.enabled = localVideoEnabled;
+                const btn = document.getElementById('toggle-local-video');
+                btn.textContent = localVideoEnabled ? '📹' : '📵';
+                btn.style.background = localVideoEnabled ? 'rgba(0,0,0,0.7)' : 'rgba(231, 76, 60, 0.9)';
+            }
+        }
+
+        function toggleLocalAudio() {
+            if (!localStream) return;
+            
+            const audioTrack = localStream.getAudioTracks()[0];
+            if (audioTrack) {
+                localAudioEnabled = !localAudioEnabled;
+                audioTrack.enabled = localAudioEnabled;
+                const btn = document.getElementById('toggle-local-audio');
+                btn.textContent = localAudioEnabled ? '🔊 Meu Áudio' : '🔇 Meu Áudio';
+                btn.style.background = localAudioEnabled ? '#27ae60' : '#e74c3c';
+            }
+        }
+
+        function toggleRemoteVideo() {
+            const remoteVideo = document.getElementById('remote-video');
+            if (!remoteVideo) return;
+            
+            remoteVideoVisible = !remoteVideoVisible;
+            remoteVideo.style.display = remoteVideoVisible ? 'block' : 'none';
+            const btn = document.getElementById('toggle-remote-video');
+            btn.textContent = remoteVideoVisible ? '👁️' : '👁️‍🗨️';
+            btn.style.background = remoteVideoVisible ? 'rgba(0,0,0,0.7)' : 'rgba(231, 76, 60, 0.9)';
+        }
+
+        function toggleRemoteAudio() {
+            const remoteVideo = document.getElementById('remote-video');
+            if (!remoteVideo) return;
+            
+            remoteAudioEnabled = !remoteAudioEnabled;
+            remoteVideo.muted = !remoteAudioEnabled;
+            const btn = document.getElementById('toggle-remote-audio');
+            btn.textContent = remoteAudioEnabled ? '🔊 Áudio Remoto' : '🔇 Áudio Remoto';
+            btn.style.background = remoteAudioEnabled ? '#27ae60' : '#e74c3c';
+        }
+
+        // Configurar callbacks WebRTC
+        window.onWebRTCOffer = async (data) => {
+            if (!onlineRoomId || !onlineOpponent) return;
+
+            try {
+                if (!localStream) {
+                    localStream = await navigator.mediaDevices.getUserMedia({
+                        video: true,
+                        audio: true
+                    });
+
+                    const localVideo = document.getElementById('local-video');
+                    localVideo.srcObject = localStream;
+                    localVideo.muted = true; // Sempre mudo no local para evitar feedback
+                }
+
+                peerConnection = new RTCPeerConnection(configuration);
+
+                localStream.getTracks().forEach(track => {
+                    peerConnection.addTrack(track, localStream);
+                });
+
+                peerConnection.ontrack = (event) => {
+                    remoteStream = event.streams[0];
+                    const remoteVideo = document.getElementById('remote-video');
+                    remoteVideo.srcObject = remoteStream;
+                    remoteVideo.muted = !remoteAudioEnabled;
+                };
+
+                peerConnection.onicecandidate = (event) => {
+                    if (event.candidate) {
+                        SocketAPI.sendWebRTCICECandidate(onlineRoomId, event.candidate);
+                    }
+                };
+
+                await peerConnection.setRemoteDescription(new RTCSessionDescription(data.offer));
+                const answer = await peerConnection.createAnswer();
+                await peerConnection.setLocalDescription(answer);
+                SocketAPI.sendWebRTCAnswer(onlineRoomId, answer);
+
+                isVideochatActive = true;
+                document.getElementById('videochat-toggle-btn').textContent = 'Convidar para Vídeochat';
+                document.getElementById('videochat-toggle-btn').disabled = false;
+                document.getElementById('videochat-videos').style.display = 'flex';
+                document.getElementById('videochat-invite-status').style.display = 'none';
+            } catch (error) {
+            }
+        };
+
+        window.onWebRTCAnswer = async (data) => {
+            if (peerConnection) {
+                try {
+                    await peerConnection.setRemoteDescription(new RTCSessionDescription(data.answer));
+                } catch (error) {
+                }
+            }
+        };
+
+        window.onWebRTCICECandidate = async (data) => {
+            if (peerConnection) {
+                try {
+                    await peerConnection.addIceCandidate(new RTCIceCandidate(data.candidate));
+                } catch (error) {
+                }
+            }
+        };
+
+        // ========== CHAT ==========
+        
+        let chatTarget = 'room'; // 'room' ou 'general'
+
+        function updateChatTarget() {
+            chatTarget = document.getElementById('chat-target').value;
+        }
+
+        function sendChatMessage() {
+            const input = document.getElementById('chat-input');
+            const message = input.value.trim();
+            
+            if (!message) return;
+
+            SocketAPI.sendChatMessage(onlineRoomId, message, chatTarget);
+            input.value = '';
+        }
+
+        function handleChatKeyPress(event) {
+            if (event.key === 'Enter') {
+                sendChatMessage();
+            }
+        }
+
+        window.onChatMessage = (data) => {
+            const messagesDiv = document.getElementById('chat-messages');
+            const messageDiv = document.createElement('div');
+            messageDiv.className = 'chat-message';
+            
+            const timestamp = new Date(data.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+            
+            messageDiv.innerHTML = `
+                <div>
+                    <span class="username">${data.username}</span>
+                    <span class="timestamp">${timestamp}</span>
+                </div>
+                <div class="message-text">${escapeHtml(data.message)}</div>
+            `;
+            
+            messagesDiv.appendChild(messageDiv);
+            messagesDiv.scrollTop = messagesDiv.scrollHeight;
+        };
+
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Limpar vídeochat ao sair
+        window.addEventListener('beforeunload', () => {
+            stopVideochat();
+        });
+    </script>
+</body>
+</html>
+

@@ -4,20 +4,20 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Menu - Xadrez</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <link rel="icon" type="image/x-icon" href="/favicon.ico">
     <script>
-        
+        // Aplicar tema ANTES de qualquer renderização para evitar flash
         (function() {
             const savedTheme = localStorage.getItem('chess-app-theme');
             const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
             const theme = savedTheme || systemPreference;
             
-            
+            // Aplicar diretamente no HTML
             const html = document.documentElement;
             html.setAttribute('data-theme', theme);
             html.classList.add(`${theme}-theme`);
             
-            
+            // Criar e injetar estilo crítico inline
             const style = document.createElement('style');
             style.id = 'critical-theme-style';
             style.textContent = theme === 'dark' 
@@ -26,8 +26,8 @@
             document.head.appendChild(style);
         })();
     </script>
-    <link rel="stylesheet" href="../public/css/styles.css">
-    <script src="../public/js/theme.js"></script>
+    <link rel="stylesheet" href="/css/styles.css">
+    <script src="/js/theme.js"></script>
 </head>
 <body>
     <header class="header">
@@ -39,22 +39,22 @@
                     <span class="line"></span>
                 </span>
             </button>
-            <h1 class="logo"><a href="index.html" style="color: inherit; text-decoration: none;">Xadrez</a></h1>
+            <h1 class="logo"><a href="/index.html" style="color: inherit; text-decoration: none;">Xadrez</a></h1>
             <button class="menu-toggle" id="menuToggle" onclick="toggleMobileMenu()" aria-label="Menu">
                 ☰
             </button>
             <nav class="nav">
-                <a href="login.html" class="nav-link" id="login-link">Login</a>
-                <a href="tabuleiro.html" class="nav-link">Jogar Local</a>
-                <a href="lobby.html" class="nav-link">Jogar Online</a>
-                <a href="regras.html" class="nav-link">Regras</a>
-                <a href="dom.html" class="nav-link">DOM</a>
-                <a href="sobre.html" class="nav-link">Sobre</a>
+                <a href="/login.html" class="nav-link" id="login-link">Login</a>
+                <a href="/tabuleiro.html" class="nav-link">Jogar Local</a>
+                <a href="/lobby.html" class="nav-link">Jogar Online</a>
+                <a href="/regras.html" class="nav-link">Regras</a>
+                <a href="/dom.html" class="nav-link">DOM</a>
+                <a href="/sobre.html" class="nav-link">Sobre</a>
                 <button class="theme-toggle-btn theme-toggle-btn" onclick="toggleTheme()" aria-label="Alternar tema">
                     <span class="theme-icon">🌙</span>
                 </button>
                 <div id="user-avatar-nav" style="display: none; margin-left: 15px;">
-                    <a href="perfil.html" id="avatar-link" style="display: inline-block;">
+                    <a href="/perfil.html" id="avatar-link" style="display: inline-block;">
                         <div id="header-avatar" class="header-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: #4CAF50; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; cursor: pointer; border: 2px solid white;"></div>
                     </a>
                 </div>
@@ -62,13 +62,13 @@
         </div>
         <div class="mobile-menu" id="mobileMenu">
             <div class="mobile-menu-content">
-                <a href="login.html" class="mobile-menu-link" id="mobile-login-link" onclick="closeMobileMenu()">Login</a>
-                <a href="tabuleiro.html" class="mobile-menu-link" onclick="closeMobileMenu()">Jogar Local</a>
-                <a href="lobby.html" class="mobile-menu-link" onclick="closeMobileMenu()">Jogar Online</a>
-                <a href="regras.html" class="mobile-menu-link" onclick="closeMobileMenu()">Regras</a>
-                <a href="dom.html" class="mobile-menu-link" onclick="closeMobileMenu()">DOM</a>
-                <a href="sobre.html" class="mobile-menu-link" onclick="closeMobileMenu()">Sobre</a>
-                <a href="perfil.html" class="mobile-menu-link" id="mobile-profile-link" onclick="closeMobileMenu()" style="display: none;">Perfil</a>
+                <a href="/login.html" class="mobile-menu-link" id="mobile-login-link" onclick="closeMobileMenu()">Login</a>
+                <a href="/tabuleiro.html" class="mobile-menu-link" onclick="closeMobileMenu()">Jogar Local</a>
+                <a href="/lobby.html" class="mobile-menu-link" onclick="closeMobileMenu()">Jogar Online</a>
+                <a href="/regras.html" class="mobile-menu-link" onclick="closeMobileMenu()">Regras</a>
+                <a href="/dom.html" class="mobile-menu-link" onclick="closeMobileMenu()">DOM</a>
+                <a href="/sobre.html" class="mobile-menu-link" onclick="closeMobileMenu()">Sobre</a>
+                <a href="/perfil.html" class="mobile-menu-link" id="mobile-profile-link" onclick="closeMobileMenu()" style="display: none;">Perfil</a>
                 <button class="mobile-menu-link" onclick="toggleTheme(); closeMobileMenu();" style="background: none; border: none; width: 100%; text-align: left; cursor: pointer;">
                     Alternar Tema
                 </button>
@@ -131,8 +131,8 @@
         </div>
     </aside>
     
-    <script src="../public/js/auth.js"></script>
-    <script src="../public/js/profile.js"></script>
+    <script src="/js/auth.js"></script>
+    <script src="/js/profile.js"></script>
     <script>
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
@@ -149,7 +149,7 @@
             menu.classList.remove('open');
         }
         
-        
+        // Verificar autenticação e mostrar avatar se logado
         document.addEventListener('DOMContentLoaded', async () => {
             try {
                 const auth = await AuthAPI.checkAuth();
@@ -159,7 +159,7 @@
                     if (loginLink) loginLink.style.display = 'none';
                     if (mobileLoginLink) mobileLoginLink.style.display = 'none';
                     
-                    
+                    // Carregar perfil para mostrar avatar
                     try {
                         const profile = await ProfileAPI.getProfile();
                         const headerAvatar = document.getElementById('header-avatar');
@@ -184,14 +184,14 @@
                     }
                 }
             } catch (error) {
-                
+                // Não autenticado, não faz nada
             }
             
-            
+            // Carregar ranking
             loadTopPlayer();
         });
         
-        
+        // Carregar top player do ranking
         async function loadTopPlayer() {
             try {
                 const response = await fetch('/api/ranking/top');
@@ -212,7 +212,7 @@
                     rankingScore.textContent = topPlayer.score || 0;
                     rankingHighScore.textContent = topPlayer.highScore || 0;
                     
-                    
+                    // Configurar avatar
                     if (topPlayer.foto) {
                         rankingAvatar.innerHTML = `<img src="${topPlayer.foto}" alt="${topPlayer.username}">`;
                     } else {

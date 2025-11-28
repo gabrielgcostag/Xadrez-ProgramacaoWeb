@@ -1,15 +1,13 @@
-
 require('dotenv').config();
 const mongoose = require('mongoose');
 const User = require('./models/User');
 const Game = require('./models/Game');
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb:
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/xadrez';
 
 async function verDados() {
     try {
         await mongoose.connect(MONGODB_URI);
-        
         
         const users = await User.find().select('-password');
         
@@ -21,7 +19,6 @@ async function verDados() {
         } else {
         }
         
-        
         const games = await Game.find().populate('userId', 'username');
         
         if (games.length > 0) {
@@ -29,7 +26,6 @@ async function verDados() {
                 if (g.finishedAt) {
                 }
             });
-            
             
             const porModo = await Game.aggregate([
                 { $group: { _id: '$gameMode', total: { $sum: 1 } } }
