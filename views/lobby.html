@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lobby Online - Xadrez</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script>
+        
+        (function() {
+            const savedTheme = localStorage.getItem('chess-app-theme');
+            const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            const theme = savedTheme || systemPreference;
+            
+            
+            const html = document.documentElement;
+            html.setAttribute('data-theme', theme);
+            html.classList.add(`${theme}-theme`);
+            
+            
+            const style = document.createElement('style');
+            style.id = 'critical-theme-style';
+            style.textContent = theme === 'dark' 
+                ? `html,body{background-color:#1a1a1a!important;color:#e0e0e0!important;}`
+                : `html,body{background-color:#f0f0f0!important;color:#333!important;}`;
+            document.head.appendChild(style);
+        })();
+    </script>
+    <link rel="stylesheet" href="../public/css/styles.css">
+    <script src="../public/js/theme.js"></script>
+    <style>
+        .lobby-container {
+            max-width: 1000px;
+            margin: 40px auto;
+            padding: 30px;
+        }
+
+        .lobby-header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .lobby-actions {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 30px;
+            justify-content: center;
+        }
+
+        .btn-lobby {
+            padding: 15px 30px;
+            font-size: 1.1em;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+        }
+
+        .btn-create {
+            background: #27ae60;
+            color: white;
+        }
+
+        .btn-create:hover {
+            background: #229954;
+            transform: translateY(-2px);
+        }
+
+        .btn-join {
+            background: #3498db;
+            color: white;
+        }
+
+        .btn-join:hover {
+            background: #2980b9;
+            transform: translateY(-2px);
+        }
+
+        .rooms-section {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .rooms-section h3 {
+            margin-bottom: 20px;
+            color: #2c3e50;
+        }
+
+        .rooms-list {
+            display: grid;
+            gap: 15px;
+        }
+
+        .room-card {
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+            cursor: pointer;
+        }
+
+        .room-card:hover {
+            border-color: #3498db;
+            transform: translateX(5px);
+        }
+
+        .room-card.available {
+            border-color: #27ae60;
+        }
+
+        .room-info {
+            flex: 1;
+        }
+
+        .room-id {
+            font-weight: bold;
+            font-size: 1.2em;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+
+        .room-players {
+            color: #7f8c8d;
+            font-size: 0.9em;
+        }
+
+        .room-status {
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+
+        .status-waiting {
+            background: #f39c12;
+            color: white;
+        }
+
+        .status-playing {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .join-room-form {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+
+        .join-room-form input {
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 1em;
+            width: 200px;
+            margin-right: 10px;
+        }
+
+        .join-room-form button {
+            padding: 10px 20px;
+            background: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 1em;
+        }
+
+        .message {
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .message.success {
+            background: #27ae60;
+            color: white;
+        }
+
+        .message.error {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .message.info {
+            background: #3498db;
+            color: white;
+        }
+
+        .current-room {
+            background: #e8f5e9;
+            border: 2px solid #27ae60;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .current-room h3 {
+            color: #27ae60;
+            margin-bottom: 15px;
+        }
+
+        .room-players-info {
+            display: flex;
+            gap: 30px;
+            margin-bottom: 15px;
+        }
+
+        .player-info {
+            flex: 1;
+        }
+
+        .player-info strong {
+            display: block;
+            margin-bottom: 5px;
+            color: #2c3e50;
+        }
+
+        .waiting-opponent {
+            text-align: center;
+            padding: 20px;
+            color: #7f8c8d;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <h1 class="logo"><a href="index.html" style="color: inherit; text-decoration: none;">Xadrez</a></h1>
+            <button class="menu-toggle" id="menuToggle" onclick="toggleMobileMenu()" aria-label="Menu">
+                ☰
+            </button>
+            <nav class="nav">
+                <a href="login.html" class="nav-link" id="login-link">Login</a>
+                <a href="tabuleiro.html" class="nav-link">Jogar Local</a>
+                <a href="lobby.html" class="nav-link active">Jogar Online</a>
+                <a href="regras.html" class="nav-link">Regras</a>
+                <a href="dom.html" class="nav-link">DOM</a>
+                <a href="sobre.html" class="nav-link">Sobre</a>
+                <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Alternar tema">
+                    <span class="theme-icon">🌙</span>
+                </button>
+                <div id="user-avatar-nav" style="display: none; margin-left: 15px;">
+                    <a href="perfil.html" id="avatar-link" style="display: inline-block;">
+                        <div id="header-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: #4CAF50; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; cursor: pointer; border: 2px solid white;"></div>
+                    </a>
+                </div>
+            </nav>
+        </div>
+        <div class="mobile-menu" id="mobileMenu">
+            <div class="mobile-menu-content">
+                <a href="login.html" class="mobile-menu-link" id="mobile-login-link" onclick="closeMobileMenu()">Login</a>
+                <a href="tabuleiro.html" class="mobile-menu-link" onclick="closeMobileMenu()">Jogar Local</a>
+                <a href="lobby.html" class="mobile-menu-link" onclick="closeMobileMenu()">Jogar Online</a>
+                <a href="regras.html" class="mobile-menu-link" onclick="closeMobileMenu()">Regras</a>
+                <a href="dom.html" class="mobile-menu-link" onclick="closeMobileMenu()">DOM</a>
+                <a href="sobre.html" class="mobile-menu-link" onclick="closeMobileMenu()">Sobre</a>
+                <a href="perfil.html" class="mobile-menu-link" id="mobile-profile-link" onclick="closeMobileMenu()" style="display: none;">Perfil</a>
+                <button class="mobile-menu-link" onclick="toggleTheme(); closeMobileMenu();" style="background: none; border: none; width: 100%; text-align: left; cursor: pointer;">
+                    Alternar Tema
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <main class="main-content">
+        <div class="lobby-container">
+            <div class="lobby-header">
+                <h2>Lobby Online - Xadrez</h2>
+                <p>Jogue contra outros jogadores em tempo real</p>
+            </div>
+
+            <div class="message" id="message"></div>
+
+            <!-- Sala Atual -->
+            <div id="current-room-section" class="current-room" style="display: none;">
+                <h3>Sua Sala</h3>
+                <div class="room-players-info">
+                    <div class="player-info">
+                        <strong>Você:</strong>
+                        <span id="current-player-name"></span>
+                        <span id="current-player-color"></span>
+                    </div>
+                    <div class="player-info">
+                        <strong>Oponente:</strong>
+                        <span id="opponent-name">Aguardando oponente...</span>
+                    </div>
+                </div>
+                <div id="room-id-display" style="margin-bottom: 15px;">
+                    <strong>ID da Sala:</strong> <span id="room-id-text"></span>
+                </div>
+                <div id="waiting-opponent" class="waiting-opponent" style="display: none;">
+                    Aguardando outro jogador entrar...
+                </div>
+                <div id="game-ready" style="display: none;">
+                    <button class="btn-lobby btn-create" onclick="startOnlineGame()">Ir para o Jogo</button>
+                </div>
+                <button class="btn-lobby" style="background: #e74c3c; color: white;" onclick="leaveCurrentRoom()">Sair da Sala</button>
+            </div>
+
+            <!-- Ações -->
+            <div class="lobby-actions">
+                <button class="btn-lobby btn-create" onclick="createRoom()">Criar Nova Sala</button>
+                <button class="btn-lobby btn-join" onclick="toggleJoinForm()">Entrar em Sala</button>
+                <button class="btn-lobby" id="queue-btn" onclick="toggleQueue()" style="background: #9b59b6; color: white;">Entrar na Fila</button>
+            </div>
+
+            <!-- Status da Fila -->
+            <div id="queue-status" class="rooms-section" style="display: none;">
+                <h3>Fila de Espera</h3>
+                <p id="queue-position">Posição na fila: <span id="queue-position-number">-</span></p>
+                <p id="queue-size">Jogadores na fila: <span id="queue-size-number">0</span></p>
+                <p id="queue-message" class="message info" style="display: none;"></p>
+                <button class="btn-lobby" onclick="leaveQueue()" style="background: #e74c3c; color: white;">Sair da Fila</button>
+            </div>
+
+            <!-- Formulário de Entrar -->
+            <div id="join-form" class="join-room-form" style="display: none;">
+                <h3>Entrar em Sala Existente</h3>
+                <input type="text" id="room-id-input" placeholder="Digite o ID da sala">
+                <button onclick="joinRoomById()">Entrar</button>
+                <button onclick="toggleJoinForm()" style="background: #95a5a6;">Cancelar</button>
+            </div>
+
+            <!-- Lista de Salas Disponíveis -->
+            <div class="rooms-section">
+                <h3>Salas Disponíveis</h3>
+                <button onclick="refreshRooms()" style="padding: 8px 15px; background: #3498db; color: white; border: none; border-radius: 5px; cursor: pointer; margin-bottom: 15px;">Atualizar Lista</button>
+                <div id="rooms-list" class="rooms-list">
+                    <p style="text-align: center; color: #7f8c8d;">Carregando salas...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="../public/js/auth.js"></script>
+    <script src="../public/js/profile.js"></script>
+    <script src="../public/js/header.js"></script>
+    <script src="https:
+    <script src="../public/js/socket-client.js"></script>
+    <script src="../public/js/lobby.js"></script>
+</body>
+</html>
+

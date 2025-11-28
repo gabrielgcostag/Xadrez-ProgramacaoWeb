@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DOM da Aplicação - Xadrez</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script>
+        
+        (function() {
+            const savedTheme = localStorage.getItem('chess-app-theme');
+            const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            const theme = savedTheme || systemPreference;
+            
+            
+            const html = document.documentElement;
+            html.setAttribute('data-theme', theme);
+            html.classList.add(`${theme}-theme`);
+            
+            
+            const style = document.createElement('style');
+            style.id = 'critical-theme-style';
+            style.textContent = theme === 'dark' 
+                ? `html,body{background-color:#1a1a1a!important;color:#e0e0e0!important;}`
+                : `html,body{background-color:#f0f0f0!important;color:#333!important;}`;
+            document.head.appendChild(style);
+        })();
+    </script>
+    <link rel="stylesheet" href="../public/css/styles.css">
+    <script src="../public/js/theme.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <h1 class="logo"><a href="index.html" style="color: inherit; text-decoration: none;">Xadrez</a></h1>
+            <button class="menu-toggle" id="menuToggle" onclick="toggleMobileMenu()" aria-label="Menu">
+                ☰
+            </button>
+            <nav class="nav">
+                <a href="login.html" class="nav-link" id="login-link">Login</a>
+                <a href="tabuleiro.html" class="nav-link">Jogar Local</a>
+                <a href="lobby.html" class="nav-link">Jogar Online</a>
+                <a href="regras.html" class="nav-link">Regras</a>
+                <a href="dom.html" class="nav-link active">DOM</a>
+                <a href="sobre.html" class="nav-link">Sobre</a>
+                <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Alternar tema">
+                    <span class="theme-icon">🌙</span>
+                </button>
+                <div id="user-avatar-nav" style="display: none; margin-left: 15px;">
+                    <a href="perfil.html" id="avatar-link" style="display: inline-block;">
+                        <div id="header-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: #4CAF50; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; cursor: pointer; border: 2px solid white;"></div>
+                    </a>
+                </div>
+            </nav>
+        </div>
+        <div class="mobile-menu" id="mobileMenu">
+            <div class="mobile-menu-content">
+                <a href="login.html" class="mobile-menu-link" id="mobile-login-link" onclick="closeMobileMenu()">Login</a>
+                <a href="tabuleiro.html" class="mobile-menu-link" onclick="closeMobileMenu()">Jogar Local</a>
+                <a href="lobby.html" class="mobile-menu-link" onclick="closeMobileMenu()">Jogar Online</a>
+                <a href="regras.html" class="mobile-menu-link" onclick="closeMobileMenu()">Regras</a>
+                <a href="dom.html" class="mobile-menu-link" onclick="closeMobileMenu()">DOM</a>
+                <a href="sobre.html" class="mobile-menu-link" onclick="closeMobileMenu()">Sobre</a>
+                <a href="perfil.html" class="mobile-menu-link" id="mobile-profile-link" onclick="closeMobileMenu()" style="display: none;">Perfil</a>
+                <button class="mobile-menu-link" onclick="toggleTheme(); closeMobileMenu();" style="background: none; border: none; width: 100%; text-align: left; cursor: pointer;">
+                    Alternar Tema
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <main class="main-content">
+        <div class="dom-container">
+            <h2>DOM (Document Object Model) da Aplicação</h2>
+            <p class="dom-intro">O DOM é uma representação em árvore dos elementos HTML de uma página. Explore a estrutura da aplicação abaixo:</p>
+            
+            <div class="dom-controls">
+                <button onclick="expandAll()" class="dom-btn">Expandir Tudo</button>
+                <button onclick="collapseAll()" class="dom-btn">Recolher Tudo</button>
+                <button onclick="refreshDOM()" class="dom-btn">Atualizar DOM</button>
+                <input type="text" id="searchDOM" placeholder="Buscar no DOM..." onkeyup="searchInDOM(this.value)" class="dom-search">
+            </div>
+            
+            <div class="dom-tree" id="domTree"></div>
+        </div>
+    </main>
+    
+    <script src="../public/js/auth.js"></script>
+    <script src="../public/js/profile.js"></script>
+    <script src="../public/js/header.js"></script>
+    <script>
+        
+        function renderDOM(element, parentElement, level = 0) {
+            if (!element || element.nodeType === 3 && !element.textContent.trim()) {
+                return;
+            }
+
+            const domItem = document.createElement('div');
+            domItem.className = 'dom-item';
+            domItem.style.paddingLeft = (level * 20) + 'px';
+            domItem.dataset.level = level;
+            
+            let content = '';
+            
+            if (element.nodeType === 1) {
+                
+                const tagName = element.tagName.toLowerCase();
+                const id = element.id ? `#${element.id}` : '';
+                const classes = element.className ? `.${element.className.split(' ').join('.')}` : '';
+                const attributes = Array.from(element.attributes)
+                    .filter(attr => attr.name !== 'class' && attr.name !== 'id')
+                    .map(attr => ` ${attr.name}="${attr.value}"`)
+                    .join('');
+                
+                content = `<span class="dom-tag">&lt;${tagName}${id}${classes}${attributes}&gt;</span>`;
+                
+                if (element.children.length === 0 && !element.textContent.trim()) {
+                    content = content.replace('&gt;', '/&gt;');
+                }
+                
+                domItem.innerHTML = `
+                    <span class="dom-toggle" onclick="toggleDOMNode(this)">▶</span>
+                    ${content}
+                `;
+                
+                const childrenContainer = document.createElement('div');
+                childrenContainer.className = 'dom-children';
+                childrenContainer.style.display = 'none';
+                
+                
+                Array.from(element.children).forEach(child => {
+                    renderDOM(child, childrenContainer, level + 1);
+                });
+                
+                
+                Array.from(element.childNodes).forEach(node => {
+                    if (node.nodeType === 3 && node.textContent.trim()) {
+                        const textNode = document.createElement('div');
+                        textNode.className = 'dom-text';
+                        textNode.style.paddingLeft = ((level + 1) * 20) + 'px';
+                        textNode.textContent = node.textContent.trim();
+                        textNode.style.color = '#666';
+                        childrenContainer.appendChild(textNode);
+                    }
+                });
+                
+                domItem.appendChild(childrenContainer);
+                
+            } else if (element.nodeType === 3 && element.textContent.trim()) {
+                
+                domItem.className = 'dom-text';
+                domItem.textContent = element.textContent.trim();
+                domItem.style.color = '#666';
+            }
+            
+            if (content || element.nodeType === 3) {
+                parentElement.appendChild(domItem);
+            }
+        }
+        
+        function toggleDOMNode(toggleElement) {
+            const domItem = toggleElement.parentElement;
+            const childrenContainer = domItem.querySelector('.dom-children');
+            
+            if (childrenContainer) {
+                const isHidden = childrenContainer.style.display === 'none';
+                childrenContainer.style.display = isHidden ? 'block' : 'none';
+                toggleElement.textContent = isHidden ? '▼' : '▶';
+            }
+        }
+        
+        function expandAll() {
+            document.querySelectorAll('.dom-children').forEach(children => {
+                children.style.display = 'block';
+            });
+            document.querySelectorAll('.dom-toggle').forEach(toggle => {
+                toggle.textContent = '▼';
+            });
+        }
+        
+        function collapseAll() {
+            document.querySelectorAll('.dom-children').forEach(children => {
+                children.style.display = 'none';
+            });
+            document.querySelectorAll('.dom-toggle').forEach(toggle => {
+                toggle.textContent = '▶';
+            });
+        }
+        
+        function refreshDOM() {
+            const domTree = document.getElementById('domTree');
+            domTree.innerHTML = '';
+            renderDOM(document.documentElement, domTree);
+        }
+        
+        function searchInDOM(query) {
+            const queryLower = query.toLowerCase();
+            const items = document.querySelectorAll('.dom-item, .dom-text');
+            
+            items.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (query === '' || text.includes(queryLower)) {
+                    item.style.backgroundColor = '';
+                    item.style.fontWeight = 'normal';
+                    
+                    if (query !== '' && text.includes(queryLower)) {
+                        item.style.backgroundColor = '#ffeb3b';
+                        item.style.fontWeight = 'bold';
+                        
+                        
+                        let parent = item.parentElement;
+                        while (parent && parent.classList.contains('dom-children')) {
+                            parent.style.display = 'block';
+                            const toggle = parent.parentElement.querySelector('.dom-toggle');
+                            if (toggle) toggle.textContent = '▼';
+                            parent = parent.parentElement.parentElement;
+                        }
+                    }
+                } else {
+                    item.style.backgroundColor = '';
+                    item.style.fontWeight = 'normal';
+                }
+            });
+        }
+        
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            refreshDOM();
+        });
+    </script>
+</body>
+</html>
+

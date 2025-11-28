@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sobre - Xadrez</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script>
+        
+        (function() {
+            const savedTheme = localStorage.getItem('chess-app-theme');
+            const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            const theme = savedTheme || systemPreference;
+            
+            
+            const html = document.documentElement;
+            html.setAttribute('data-theme', theme);
+            html.classList.add(`${theme}-theme`);
+            
+            
+            const style = document.createElement('style');
+            style.id = 'critical-theme-style';
+            style.textContent = theme === 'dark' 
+                ? `html,body{background-color:#1a1a1a!important;color:#e0e0e0!important;}`
+                : `html,body{background-color:#f0f0f0!important;color:#333!important;}`;
+            document.head.appendChild(style);
+        })();
+    </script>
+    <link rel="stylesheet" href="../public/css/styles.css">
+    <script src="../public/js/theme.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <h1 class="logo"><a href="index.html" style="color: inherit; text-decoration: none;">Xadrez</a></h1>
+            <button class="menu-toggle" id="menuToggle" onclick="toggleMobileMenu()" aria-label="Menu">
+                ☰
+            </button>
+            <nav class="nav">
+                <a href="login.html" class="nav-link" id="login-link">Login</a>
+                <a href="tabuleiro.html" class="nav-link">Jogar Local</a>
+                <a href="lobby.html" class="nav-link">Jogar Online</a>
+                <a href="regras.html" class="nav-link">Regras</a>
+                <a href="dom.html" class="nav-link">DOM</a>
+                <a href="sobre.html" class="nav-link active">Sobre</a>
+                <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Alternar tema">
+                    <span class="theme-icon">🌙</span>
+                </button>
+                <div id="user-avatar-nav" style="display: none; margin-left: 15px;">
+                    <a href="perfil.html" id="avatar-link" style="display: inline-block;">
+                        <div id="header-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: #4CAF50; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; cursor: pointer; border: 2px solid white;"></div>
+                    </a>
+                </div>
+            </nav>
+        </div>
+        <div class="mobile-menu" id="mobileMenu">
+            <div class="mobile-menu-content">
+                <a href="login.html" class="mobile-menu-link" id="mobile-login-link" onclick="closeMobileMenu()">Login</a>
+                <a href="tabuleiro.html" class="mobile-menu-link" onclick="closeMobileMenu()">Jogar Local</a>
+                <a href="lobby.html" class="mobile-menu-link" onclick="closeMobileMenu()">Jogar Online</a>
+                <a href="regras.html" class="mobile-menu-link" onclick="closeMobileMenu()">Regras</a>
+                <a href="dom.html" class="mobile-menu-link" onclick="closeMobileMenu()">DOM</a>
+                <a href="sobre.html" class="mobile-menu-link" onclick="closeMobileMenu()">Sobre</a>
+                <a href="perfil.html" class="mobile-menu-link" id="mobile-profile-link" onclick="closeMobileMenu()" style="display: none;">Perfil</a>
+                <button class="mobile-menu-link" onclick="toggleTheme(); closeMobileMenu();" style="background: none; border: none; width: 100%; text-align: left; cursor: pointer;">
+                    Alternar Tema
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <main class="main-content about-content">
+        <div class="container">
+            <h2>Sobre o Projeto</h2>
+            
+            <div class="about-section">
+                <h3>Objetivo do Projeto</h3>
+                <p>Este projeto foi desenvolvido como parte da disciplina de <strong>Programação para Web</strong>, com o objetivo de criar uma aplicação web completa e funcional que demonstre os conhecimentos adquiridos em HTML, CSS e JavaScript.</p>
+                <p>O jogo de xadrez foi escolhido por ser um desafio interessante que combina lógica de programação, interface de usuário e interatividade, permitindo explorar diversos conceitos importantes do desenvolvimento web.</p>
+            </div>
+
+            <div class="about-section">
+                <h3>O Jogo de Xadrez</h3>
+                <p>O xadrez é um dos jogos mais antigos e populares do mundo, conhecido por sua complexidade estratégica e capacidade de desenvolver o raciocínio lógico. Nossa implementação inclui:</p>
+                <ul class="features-list">
+                    <li>Tabuleiro interativo com peças visuais</li>
+                    <li>Sistema completo de movimentação das peças</li>
+                    <li>Validação de movimentos legais</li>
+                    <li>Detecção de xeque e xeque-mate</li>
+                    <li>Promoção de peões</li>
+                    <li>Movimentos especiais (roque, en passant)</li>
+                    <li>Interface responsiva e moderna</li>
+                </ul>
+            </div>
+
+            <div class="about-section">
+                <h3>Tecnologias Utilizadas</h3>
+                <div class="tech-section">
+                    <div class="tech-item">
+                        <h4>HTML5</h4>
+                        <p>Estruturação semântica das páginas, utilizando elementos modernos como header, nav, main, aside e footer para uma melhor organização do conteúdo.</p>
+                    </div>
+                    <div class="tech-item">
+                        <h4>CSS3</h4>
+                        <p>Estilização avançada com Flexbox, Grid, animações, transições e design responsivo para garantir uma experiência visual atrativa em todos os dispositivos.</p>
+                    </div>
+                    <div class="tech-item">
+                        <h4>JavaScript ES6+</h4>
+                        <p>Programação orientada a objetos para o sistema de peças, manipulação do DOM, validação de movimentos e controle da lógica do jogo.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="about-section">
+                <h3>Arquitetura do Projeto</h3>
+                <div class="architecture">
+                    <div class="arch-item">
+                        <h4>Estrutura Modular</h4>
+                        <p>O projeto foi organizado em módulos separados para cada funcionalidade, facilitando a manutenção e expansão do código.</p>
+                    </div>
+                    <div class="arch-item">
+                        <h4>Programação Orientada a Objetos</h4>
+                        <p>Cada peça do xadrez é implementada como uma classe com seus próprios métodos de validação e movimentação.</p>
+                    </div>
+                    <div class="arch-item">
+                        <h4>Interface Responsiva</h4>
+                        <p>Design adaptável que funciona perfeitamente em desktop, tablet e dispositivos móveis.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="about-section">
+                <h3>Desenvolvedores</h3>
+                <div class="developers">
+                    <div class="developer-card">
+                        <div class="developer-info">
+                            <h4>Gabriel Gomes</h4>
+                            <p class="role">Desenvolvedor</p>
+                            <p class="email">gabrielgcostag@gmail.com</p>
+                        </div>
+                    </div>
+                    <div class="developer-card">
+                        <div class="developer-info">
+                            <h4>Larissa Benedet</h4>
+                            <p class="role">Desenvolvedora</p>
+                            <p class="email">larissabenedet27@gmail.com</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="back-button">
+                <a href="index.html" class="btn-voltar">Voltar ao Menu</a>
+            </div>
+        </div>
+    </main>
+
+    <aside class="sidebar collapsed" id="sidebar">
+        <div class="sidebar-content">
+            <h3>Informações do Projeto</h3>
+            <div class="info-section">
+                <h4>Autores</h4>
+                <ul>
+                    <li>Gabriel Gomes</li>
+                    <li>Larissa Benedet</li>
+                </ul>
+            </div>
+            <div class="info-section">
+                <h4>Curso</h4>
+                <p>Programação para Web</p>
+            </div>
+            <div class="info-section">
+                <h4>Linguagens Utilizadas</h4>
+                <div class="tech-badges">
+                    <span class="badge html">HTML</span>
+                    <span class="badge css">CSS</span>
+                    <span class="badge js">JavaScript</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+    
+    <script src="../public/js/auth.js"></script>
+    <script src="../public/js/profile.js"></script>
+    <script src="../public/js/header.js"></script>
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('collapsed');
+        }
+    </script>
+</body>
+</html>

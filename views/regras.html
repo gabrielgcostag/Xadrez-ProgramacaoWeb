@@ -1,0 +1,347 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Regras do Xadrez</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script>
+        
+        (function() {
+            const savedTheme = localStorage.getItem('chess-app-theme');
+            const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            const theme = savedTheme || systemPreference;
+            
+            
+            const html = document.documentElement;
+            html.setAttribute('data-theme', theme);
+            html.classList.add(`${theme}-theme`);
+            
+            
+            const style = document.createElement('style');
+            style.id = 'critical-theme-style';
+            style.textContent = theme === 'dark' 
+                ? `html,body{background-color:#1a1a1a!important;color:#e0e0e0!important;}`
+                : `html,body{background-color:#f0f0f0!important;color:#333!important;}`;
+            document.head.appendChild(style);
+        })();
+    </script>
+    <link rel="stylesheet" href="../public/css/styles.css">
+    <script src="../public/js/theme.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <h1 class="logo"><a href="index.html" style="color: inherit; text-decoration: none;">Xadrez</a></h1>
+            <button class="menu-toggle" id="menuToggle" onclick="toggleMobileMenu()" aria-label="Menu">
+                ☰
+            </button>
+            <nav class="nav">
+                <a href="login.html" class="nav-link" id="login-link">Login</a>
+                <a href="tabuleiro.html" class="nav-link">Jogar Local</a>
+                <a href="lobby.html" class="nav-link">Jogar Online</a>
+                <a href="regras.html" class="nav-link active">Regras</a>
+                <a href="dom.html" class="nav-link">DOM</a>
+                <a href="sobre.html" class="nav-link">Sobre</a>
+                <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Alternar tema">
+                    <span class="theme-icon">🌙</span>
+                </button>
+                <div id="user-avatar-nav" style="display: none; margin-left: 15px;">
+                    <a href="perfil.html" id="avatar-link" style="display: inline-block;">
+                        <div id="header-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: #4CAF50; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; cursor: pointer; border: 2px solid white;"></div>
+                    </a>
+                </div>
+            </nav>
+        </div>
+        <div class="mobile-menu" id="mobileMenu">
+            <div class="mobile-menu-content">
+                <a href="login.html" class="mobile-menu-link" id="mobile-login-link" onclick="closeMobileMenu()">Login</a>
+                <a href="tabuleiro.html" class="mobile-menu-link" onclick="closeMobileMenu()">Jogar Local</a>
+                <a href="lobby.html" class="mobile-menu-link" onclick="closeMobileMenu()">Jogar Online</a>
+                <a href="regras.html" class="mobile-menu-link" onclick="closeMobileMenu()">Regras</a>
+                <a href="dom.html" class="mobile-menu-link" onclick="closeMobileMenu()">DOM</a>
+                <a href="sobre.html" class="mobile-menu-link" onclick="closeMobileMenu()">Sobre</a>
+                <a href="perfil.html" class="mobile-menu-link" id="mobile-profile-link" onclick="closeMobileMenu()" style="display: none;">Perfil</a>
+                <button class="mobile-menu-link" onclick="toggleTheme(); closeMobileMenu();" style="background: none; border: none; width: 100%; text-align: left; cursor: pointer;">
+                    Alternar Tema
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <main class="main-content">
+        <div class="rules-container">
+            <h2>Regras Oficiais do Xadrez</h2>
+            <p class="rules-intro">Conheça as regras completas do jogo de xadrez conforme estabelecidas pela FIDE (Federação Internacional de Xadrez).</p>
+            
+            <!-- Objetivo -->
+            <div class="rule-section">
+                <h3>🎯 Objetivo do Jogo</h3>
+                <p>O objetivo do xadrez é dar <strong>xeque-mate</strong> ao rei adversário. Xeque-mate ocorre quando o rei está em xeque e não pode escapar da captura de forma alguma.</p>
+            </div>
+
+            <!-- Tabuleiro -->
+            <div class="rule-section">
+                <h3>📐 O Tabuleiro</h3>
+                <p>O xadrez é jogado em um tabuleiro quadrado de 8x8 casas, totalizando 64 casas. As casas alternam entre cores claras e escuras. O tabuleiro é posicionado de forma que cada jogador tenha uma casa clara no canto inferior direito.</p>
+                <p>As casas são identificadas por coordenadas: letras de <strong>a</strong> a <strong>h</strong> (horizontal) e números de <strong>1</strong> a <strong>8</strong> (vertical).</p>
+            </div>
+
+            <!-- Peças -->
+            <div class="rule-section">
+                <h3>♟️ As Peças</h3>
+                <p>Cada jogador começa com 16 peças:</p>
+                <ul class="pieces-list">
+                    <li><strong>1 Rei</strong> (♔/♚) - A peça mais importante</li>
+                    <li><strong>1 Dama</strong> (♕/♛) - A peça mais poderosa</li>
+                    <li><strong>2 Torres</strong> (♖/♜)</li>
+                    <li><strong>2 Bispos</strong> (♗/♝)</li>
+                    <li><strong>2 Cavalos</strong> (♘/♞)</li>
+                    <li><strong>8 Peões</strong> (♙/♟)</li>
+                </ul>
+            </div>
+
+            <!-- Posição Inicial -->
+            <div class="rule-section">
+                <h3>🏁 Posição Inicial</h3>
+                <p>As peças brancas ficam nas linhas 1 e 2, e as pretas nas linhas 7 e 8.</p>
+                <div class="initial-board">
+                    <div class="board-diagram">
+                        <div class="diagram-row">
+                            <span class="diagram-piece">♜</span><span class="diagram-piece">♞</span><span class="diagram-piece">♝</span><span class="diagram-piece">♛</span>
+                            <span class="diagram-piece">♚</span><span class="diagram-piece">♝</span><span class="diagram-piece">♞</span><span class="diagram-piece">♜</span>
+                        </div>
+                        <div class="diagram-row">
+                            <span class="diagram-piece">♟</span><span class="diagram-piece">♟</span><span class="diagram-piece">♟</span><span class="diagram-piece">♟</span>
+                            <span class="diagram-piece">♟</span><span class="diagram-piece">♟</span><span class="diagram-piece">♟</span><span class="diagram-piece">♟</span>
+                        </div>
+                        <div class="diagram-row empty-row">
+                            <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                        </div>
+                        <div class="diagram-row empty-row">
+                            <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                        </div>
+                        <div class="diagram-row empty-row">
+                            <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                        </div>
+                        <div class="diagram-row empty-row">
+                            <span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span>
+                        </div>
+                        <div class="diagram-row">
+                            <span class="diagram-piece">♙</span><span class="diagram-piece">♙</span><span class="diagram-piece">♙</span><span class="diagram-piece">♙</span>
+                            <span class="diagram-piece">♙</span><span class="diagram-piece">♙</span><span class="diagram-piece">♙</span><span class="diagram-piece">♙</span>
+                        </div>
+                        <div class="diagram-row">
+                            <span class="diagram-piece">♖</span><span class="diagram-piece">♘</span><span class="diagram-piece">♗</span><span class="diagram-piece">♕</span>
+                            <span class="diagram-piece">♔</span><span class="diagram-piece">♗</span><span class="diagram-piece">♘</span><span class="diagram-piece">♖</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Movimento das Peças -->
+            <div class="rule-section">
+                <h3>🚶 Movimento das Peças</h3>
+                
+                <div class="piece-rule">
+                    <div class="piece-header">
+                        <span class="piece-icon">♔</span>
+                        <h4>Rei</h4>
+                    </div>
+                    <p>Move-se <strong>uma casa</strong> em qualquer direção (horizontal, vertical ou diagonal). É a peça mais importante do jogo e nunca pode ser capturada - apenas dar xeque-mate.</p>
+                    <p class="piece-note">⚠️ O rei nunca pode se colocar em xeque.</p>
+                </div>
+
+                <div class="piece-rule">
+                    <div class="piece-header">
+                        <span class="piece-icon">♕</span>
+                        <h4>Dama</h4>
+                    </div>
+                    <p>Move-se em <strong>qualquer direção</strong> (horizontal, vertical ou diagonal) <strong>quantas casas quiser</strong>, mas não pode pular sobre outras peças. É a peça mais poderosa do tabuleiro, combinando os movimentos da torre e do bispo.</p>
+                </div>
+
+                <div class="piece-rule">
+                    <div class="piece-header">
+                        <span class="piece-icon">♖</span>
+                        <h4>Torre</h4>
+                    </div>
+                    <p>Move-se <strong>horizontalmente ou verticalmente</strong> quantas casas quiser, mas não pode pular sobre outras peças. É uma peça poderosa, especialmente nas colunas abertas.</p>
+                </div>
+
+                <div class="piece-rule">
+                    <div class="piece-header">
+                        <span class="piece-icon">♗</span>
+                        <h4>Bispo</h4>
+                    </div>
+                    <p>Move-se <strong>diagonalmente</strong> quantas casas quiser, mas não pode pular sobre outras peças. Cada bispo permanece sempre nas casas da mesma cor (um nas casas claras, outro nas escuras).</p>
+                </div>
+
+                <div class="piece-rule">
+                    <div class="piece-header">
+                        <span class="piece-icon">♘</span>
+                        <h4>Cavalo</h4>
+                    </div>
+                    <p>Move-se em forma de <strong>"L"</strong>: duas casas em uma direção (horizontal ou vertical) e depois uma casa perpendicularmente. É a <strong>única peça que pode pular sobre outras</strong> peças. O movimento do cavalo é único e não pode ser bloqueado.</p>
+                </div>
+
+                <div class="piece-rule">
+                    <div class="piece-header">
+                        <span class="piece-icon">♙</span>
+                        <h4>Peão</h4>
+                    </div>
+                    <p>O peão tem movimentos especiais:</p>
+                    <ul>
+                        <li><strong>Movimento normal:</strong> Move-se uma casa para frente (na direção do oponente).</li>
+                        <li><strong>Primeiro movimento:</strong> Pode mover-se duas casas para frente.</li>
+                        <li><strong>Captura:</strong> Captura diagonalmente uma casa à frente, não pode capturar para frente.</li>
+                        <li><strong>Promoção:</strong> Quando chega à última fileira do tabuleiro, deve ser promovido a dama, torre, bispo ou cavalo (geralmente escolhe-se a dama).</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Movimentos Especiais -->
+            <div class="rule-section">
+                <h3>✨ Movimentos Especiais</h3>
+                
+                <div class="special-move">
+                    <h4>🏰 Roque</h4>
+                    <p>O roque é um movimento especial envolvendo o rei e uma torre. O rei move-se <strong>duas casas</strong> em direção à torre, e a torre "pula" sobre o rei, ficando ao seu lado.</p>
+                    <p><strong>Condições para o roque:</strong></p>
+                    <ul>
+                        <li>Nem o rei nem a torre podem ter se movido anteriormente.</li>
+                        <li>Não pode haver peças entre o rei e a torre.</li>
+                        <li>O rei não pode estar em xeque.</li>
+                        <li>O rei não pode passar por casas em xeque.</li>
+                    </ul>
+                    <p>Existem dois tipos de roque: <strong>roque pequeno</strong> (no lado do rei) e <strong>roque grande</strong> (no lado da dama).</p>
+                </div>
+
+                <div class="special-move">
+                    <h4>⚔️ Captura En Passant (Passagem)</h4>
+                    <p>Quando um peão avança <strong>duas casas</strong> em seu primeiro movimento e fica ao lado de um peão adversário (na mesma linha), o peão adversário pode capturá-lo "en passant" (na passagem), como se o peão tivesse movido apenas uma casa.</p>
+                    <p class="move-note">Esta captura deve ser feita imediatamente após o movimento do peão adversário.</p>
+                </div>
+
+                <div class="special-move">
+                    <h4>👑 Promoção do Peão</h4>
+                    <p>Quando um peão chega à <strong>última fileira</strong> do tabuleiro (fileira 8 para brancas ou fileira 1 para pretas), ele deve ser promovido imediatamente a uma das seguintes peças:</p>
+                    <ul>
+                        <li>Dama (escolha mais comum)</li>
+                        <li>Torre</li>
+                        <li>Bispo</li>
+                        <li>Cavalo</li>
+                    </ul>
+                    <p>A promoção não pode ser adiada e o peão não pode permanecer como peão. A escolha não precisa ser uma peça que já foi capturada.</p>
+                </div>
+            </div>
+
+            <!-- Xeque e Xeque-Mate -->
+            <div class="rule-section">
+                <h3>⚔️ Xeque e Xeque-Mate</h3>
+                
+                <div class="check-rule">
+                    <h4>⚠️ Xeque</h4>
+                    <p>Quando o rei está sendo <strong>atacado</strong> por uma peça adversária, diz-se que o rei está em <strong>xeque</strong>. O jogador que está em xeque <strong>deve</strong> sair do xeque imediatamente em seu próximo movimento.</p>
+                    <p>Existem três formas de sair do xeque:</p>
+                    <ol>
+                        <li>Mover o rei para uma casa segura.</li>
+                        <li>Capturar a peça que está dando xeque.</li>
+                        <li>Bloquear o xeque colocando uma peça entre o rei e a peça atacante (não funciona contra cavalos ou peões).</li>
+                    </ol>
+                </div>
+
+                <div class="check-rule">
+                    <h4>🏆 Xeque-Mate</h4>
+                    <p>Quando o rei está em <strong>xeque</strong> e não pode escapar de nenhuma forma (mover, capturar ou bloquear), ocorre o <strong>xeque-mate</strong>. O jogo termina imediatamente e o jogador que deu o xeque-mate <strong>vence</strong>.</p>
+                </div>
+            </div>
+
+            <!-- Empate -->
+            <div class="rule-section">
+                <h3>🤝 Empate</h3>
+                <p>O jogo termina em <strong>empate</strong> (não há vencedor) nas seguintes situações:</p>
+                <ul class="draw-list">
+                    <li><strong>Afogamento (Stalemate):</strong> O jogador não está em xeque, mas não tem movimentos legais disponíveis.</li>
+                    <li><strong>Material Insuficiente:</strong> Não há peças suficientes para dar xeque-mate (ex: apenas reis, rei e bispo vs rei, etc.).</li>
+                    <li><strong>Repetição de Posições:</strong> A mesma posição aparece três vezes com o mesmo jogador a mover.</li>
+                    <li><strong>Regra dos 50 Movimentos:</strong> 50 movimentos consecutivos sem captura ou movimento de peão.</li>
+                    <li><strong>Acordo:</strong> Ambos os jogadores concordam em empatar.</li>
+                </ul>
+            </div>
+
+            <!-- Regras de Jogo -->
+            <div class="rule-section">
+                <h3>📋 Regras de Jogo</h3>
+                <ul class="game-rules">
+                    <li>As <strong>brancas</strong> sempre jogam primeiro.</li>
+                    <li>Os jogadores movem alternadamente, um movimento por vez.</li>
+                    <li>Um movimento é considerado completo quando a peça é solta na nova casa.</li>
+                    <li>Não é permitido desfazer um movimento já realizado (exceto em partidas amistosas com acordo).</li>
+                    <li>Se uma peça é tocada, deve ser movida (se houver movimento legal).</li>
+                    <li>Se um movimento é iniciado, deve ser completado.</li>
+                </ul>
+            </div>
+
+            <!-- Notação -->
+            <div class="rule-section">
+                <h3>📝 Notação do Xadrez</h3>
+                <p>O xadrez possui uma notação padrão para registrar as partidas:</p>
+                <ul>
+                    <li><strong>Peças:</strong> R = Rei, D = Dama, T = Torre, B = Bispo, C = Cavalo, P = Peão</li>
+                    <li><strong>Colunas:</strong> a, b, c, d, e, f, g, h (da esquerda para direita das brancas)</li>
+                    <li><strong>Linhas:</strong> 1, 2, 3, 4, 5, 6, 7, 8 (da base das brancas para o topo)</li>
+                    <li><strong>Símbolos:</strong> x = captura, + = xeque, ++ = xeque-mate, O-O = roque pequeno, O-O-O = roque grande</li>
+                </ul>
+                <p><strong>Exemplo:</strong> e4 e5 Cf3 Cc6 Bb5 (Abertura Ruy Lopez)</p>
+            </div>
+
+            <!-- Dicas -->
+            <div class="rule-section tips-section">
+                <h3>💡 Dicas para Iniciantes</h3>
+                <div class="tips-grid">
+                    <div class="tip-card">
+                        <h4>🎯 Controle o Centro</h4>
+                        <p>O controle do centro do tabuleiro (casas d4, d5, e4, e5) oferece mais espaço e opções para suas peças.</p>
+                    </div>
+                    <div class="tip-card">
+                        <h4>⚡ Desenvolvimento</h4>
+                        <p>Desenvolva suas peças rapidamente. Saia do cavalo e do bispo nas primeiras jogadas.</p>
+                    </div>
+                    <div class="tip-card">
+                        <h4>🛡️ Proteja o Rei</h4>
+                        <p>Faça o roque o quanto antes para proteger seu rei e conectar suas torres.</p>
+                    </div>
+                    <div class="tip-card">
+                        <h4>🔄 Não Repita Movimentos</h4>
+                        <p>Evite mover a mesma peça várias vezes no início. Cada peça deve se desenvolver uma vez.</p>
+                    </div>
+                    <div class="tip-card">
+                        <h4>👁️ Observe Ameaças</h4>
+                        <p>Sempre verifique se seu movimento expõe seu rei ou suas peças a captura.</p>
+                    </div>
+                    <div class="tip-card">
+                        <h4>🧠 Planeje Antes</h4>
+                        <p>Pense antes de mover. Analise as consequências de cada movimento.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="back-button">
+                <a href="index.html" class="btn-voltar">Voltar ao Menu</a>
+            </div>
+        </div>
+    </main>
+    
+    <script src="../public/js/auth.js"></script>
+    <script src="../public/js/profile.js"></script>
+    <script src="../public/js/header.js"></script>
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            if (sidebar) {
+                sidebar.classList.toggle('collapsed');
+            }
+        }
+    </script>
+</body>
+</html>

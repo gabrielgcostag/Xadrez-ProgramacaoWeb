@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>Teste de Conexão</title>
+</head>
+<body>
+    <h1>Teste de Conexão com o Servidor</h1>
+    <button onclick="testConnection()">Testar Conexão</button>
+    <div id="result"></div>
+
+    <script>
+        async function testConnection() {
+            const resultDiv = document.getElementById('result');
+            resultDiv.innerHTML = 'Testando...';
+            
+            const protocol = window.location.protocol;
+            const hostname = window.location.hostname;
+            const port = window.location.port || '3000';
+            const url = `${protocol}//${hostname}:${port}/api/health`;
+            
+            resultDiv.innerHTML += `<br>URL: ${url}`;
+            resultDiv.innerHTML += `<br>Hostname: ${hostname}`;
+            resultDiv.innerHTML += `<br>Port: ${port}`;
+            
+            try {
+                const response = await fetch(url, {
+                    credentials: 'include'
+                });
+                
+                resultDiv.innerHTML += `<br>Status: ${response.status}`;
+                
+                if (response.ok) {
+                    const data = await response.json();
+                    resultDiv.innerHTML += `<br>✅ Sucesso! ${JSON.stringify(data)}`;
+                } else {
+                    resultDiv.innerHTML += `<br>❌ Erro: ${response.statusText}`;
+                }
+            } catch (error) {
+                resultDiv.innerHTML += `<br>❌ Erro de conexão: ${error.message}`;
+            }
+        }
+    </script>
+</body>
+</html>

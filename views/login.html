@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Xadrez</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script>
+        
+        (function() {
+            const savedTheme = localStorage.getItem('chess-app-theme');
+            const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            const theme = savedTheme || systemPreference;
+            
+            
+            const html = document.documentElement;
+            html.setAttribute('data-theme', theme);
+            html.classList.add(`${theme}-theme`);
+            
+            
+            const style = document.createElement('style');
+            style.id = 'critical-theme-style';
+            style.textContent = theme === 'dark' 
+                ? `html,body{background-color:#1a1a1a!important;color:#e0e0e0!important;}`
+                : `html,body{background-color:#f0f0f0!important;color:#333!important;}`;
+            document.head.appendChild(style);
+        })();
+    </script>
+    <link rel="stylesheet" href="../public/css/styles.css">
+    <script src="../public/js/theme.js"></script>
+    <style>
+        .auth-container {
+            max-width: 400px;
+            margin: 100px auto;
+            padding: 30px;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .auth-container h2 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+        .auth-form {
+            display: flex;
+            flex-direction: column;
+        }
+        .auth-form input {
+            padding: 12px;
+            margin-bottom: 15px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+        .auth-form button {
+            padding: 12px;
+            background: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            margin-bottom: 10px;
+        }
+        .auth-form button:hover {
+            background: #45a049;
+        }
+        .auth-form button.secondary {
+            background: #2196F3;
+        }
+        .auth-form button.secondary:hover {
+            background: #0b7dda;
+        }
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #eee;
+        }
+        .auth-tab {
+            flex: 1;
+            padding: 10px;
+            text-align: center;
+            cursor: pointer;
+            border: none;
+            background: none;
+            font-size: 16px;
+            color: #666;
+        }
+        .auth-tab.active {
+            color: #4CAF50;
+            border-bottom: 2px solid #4CAF50;
+            font-weight: bold;
+        }
+        .auth-content {
+            display: none;
+        }
+        .auth-content.active {
+            display: block;
+        }
+        .error-message {
+            background: #f44336;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        .success-message {
+            background: #4CAF50;
+            color: white;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        .link-switch {
+            text-align: center;
+            margin-top: 15px;
+            color: #666;
+        }
+        .link-switch a {
+            color: #4CAF50;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        .link-switch a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <h1 class="logo"><a href="index.html" style="color: inherit; text-decoration: none;">Xadrez</a></h1>
+            <nav class="nav">
+                <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Alternar tema">
+                    <span class="theme-icon">🌙</span>
+                </button>
+            </nav>
+        </div>
+    </header>
+    <div class="auth-container">
+        <h2>Xadrez - Login</h2>
+        
+        <div class="error-message" id="error-message"></div>
+        <div class="success-message" id="success-message"></div>
+        
+        <div class="auth-tabs">
+            <button class="auth-tab active" onclick="switchTab('login')">Login</button>
+            <button class="auth-tab" onclick="switchTab('register')">Cadastro</button>
+        </div>
+        
+        <!-- Formulário de Login -->
+        <div id="login-content" class="auth-content active">
+            <form class="auth-form" id="login-form" onsubmit="handleLogin(event)">
+                <input type="text" id="login-username" placeholder="Nome de usuário ou Email" required>
+                <input type="password" id="login-password" placeholder="Senha" required>
+                <button type="submit">Entrar</button>
+            </form>
+        </div>
+        
+        <!-- Formulário de Cadastro -->
+        <div id="register-content" class="auth-content">
+            <form class="auth-form" id="register-form" onsubmit="handleRegister(event)">
+                <input type="text" id="register-username" placeholder="Nome de usuário" required minlength="3" maxlength="20">
+                <input type="email" id="register-email" placeholder="Email" required>
+                <input type="password" id="register-password" placeholder="Senha (mínimo 6 caracteres)" required minlength="6">
+                <button type="submit">Cadastrar</button>
+            </form>
+        </div>
+    </div>
+    
+    <script src="auth.js?v=2"></script>
+</body>
+</html>

@@ -1,0 +1,918 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tabuleiro de Xadrez</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script>
+        
+        (function() {
+            const savedTheme = localStorage.getItem('chess-app-theme');
+            const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            const theme = savedTheme || systemPreference;
+            
+            
+            const html = document.documentElement;
+            html.setAttribute('data-theme', theme);
+            html.classList.add(`${theme}-theme`);
+            
+            
+            const style = document.createElement('style');
+            style.id = 'critical-theme-style';
+            style.textContent = theme === 'dark' 
+                ? `html,body{background-color:#1a1a1a!important;color:#e0e0e0!important;}`
+                : `html,body{background-color:#f0f0f0!important;color:#333!important;}`;
+            document.head.appendChild(style);
+        })();
+    </script>
+    <link rel="stylesheet" href="../public/css/styles.css">
+    <script src="../public/js/theme.js"></script>
+    <script src="../public/js/chess.js"></script>
+    <script src="../public/js/simple-ai.js"></script>
+    <script src="../public/js/auth.js"></script>
+    <script src="api.js?v=2"></script>
+    <script src="../public/js/profile.js"></script>
+    <script src="../public/js/header.js"></script>
+</head>
+<body class="board-page">
+    <header class="header">
+        <div class="header-content">
+            <h1 class="logo"><a href="index.html" style="color: inherit; text-decoration: none;">Xadrez</a></h1>
+            <button class="menu-toggle" id="menuToggle" onclick="toggleMobileMenu()" aria-label="Menu">
+                ☰
+            </button>
+            <nav class="nav">
+                <a href="login.html" class="nav-link" id="login-link">Login</a>
+                <a href="tabuleiro.html" class="nav-link active">Jogar Local</a>
+                <a href="lobby.html" class="nav-link">Jogar Online</a>
+                <a href="regras.html" class="nav-link">Regras</a>
+                <a href="dom.html" class="nav-link">DOM</a>
+                <a href="sobre.html" class="nav-link">Sobre</a>
+                <button class="theme-toggle-btn" onclick="toggleTheme()" aria-label="Alternar tema">
+                    <span class="theme-icon">🌙</span>
+                </button>
+                <div id="user-avatar-nav" style="display: none; margin-left: 15px;">
+                    <a href="perfil.html" id="avatar-link" style="display: inline-block;">
+                        <div id="header-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: #4CAF50; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; cursor: pointer; border: 2px solid white;"></div>
+                    </a>
+                </div>
+            </nav>
+        </div>
+        <div class="mobile-menu" id="mobileMenu">
+            <div class="mobile-menu-content">
+                <a href="login.html" class="mobile-menu-link" id="mobile-login-link" onclick="closeMobileMenu()">Login</a>
+                <a href="tabuleiro.html" class="mobile-menu-link" onclick="closeMobileMenu()">Jogar Local</a>
+                <a href="lobby.html" class="mobile-menu-link" onclick="closeMobileMenu()">Jogar Online</a>
+                <a href="regras.html" class="mobile-menu-link" onclick="closeMobileMenu()">Regras</a>
+                <a href="dom.html" class="mobile-menu-link" onclick="closeMobileMenu()">DOM</a>
+                <a href="sobre.html" class="mobile-menu-link" onclick="closeMobileMenu()">Sobre</a>
+                <a href="perfil.html" class="mobile-menu-link" id="mobile-profile-link" onclick="closeMobileMenu()" style="display: none;">Perfil</a>
+                <button class="mobile-menu-link" onclick="toggleTheme(); closeMobileMenu();" style="background: none; border: none; width: 100%; text-align: left; cursor: pointer;">
+                    Alternar Tema
+                </button>
+            </div>
+        </div>
+    </header>
+    
+    <div class="board-container">
+        <div class="game-sidebar">
+            <button class="btn-voltar" onclick="window.location.href='index.html'">
+                Voltar ao Menu
+            </button>
+            
+            <div class="game-status">
+                <h3 id="current-player">Vez das Brancas</h3>
+                <p id="game-state">Jogando</p>
+            </div>
+            
+            <div class="game-mode-selector">
+                <label for="game-mode">Modo de Jogo:</label>
+                <select id="game-mode" onchange="changeGameMode()">
+                    <option value="human-vs-human">Humano vs Humano</option>
+                    <option value="human-vs-ai">Humano vs Bot</option>
+                </select>
+            </div>
+            
+            <div class="ai-difficulty-selector" id="ai-difficulty" style="display: none;">
+                <label for="difficulty">Dificuldade do Bot:</label>
+                <select id="difficulty" onchange="changeDifficulty()">
+                    <option value="1">Super Fácil</option>
+                    <option value="3">Fácil</option>
+                    <option value="7" selected>Médio</option>
+                    <option value="10">Difícil</option>
+                </select>
+            </div>
+            
+            <div class="theme-selector">
+                <label for="board-theme">Tema do Tabuleiro:</label>
+                <select id="board-theme" onchange="changeBoardTheme()">
+                    <option value="green">Clássico (verde)</option>
+                    <option value="brown">Castanho</option>
+                    <option value="azul">Azul</option>
+                </select>
+            </div>
+            
+            <div class="theme-selector">
+                <label for="pieces-theme">Tema das Peças:</label>
+                <select id="pieces-theme" onchange="changePiecesTheme()">
+                    <option value="setClassico" selected>Clássico</option>
+                    <option value="setMadeira">Madeira</option>
+                    <option value="setVidro">Vidro</option>
+                </select>
+            </div>
+            
+            <div class="game-controls">
+                <button id="new-game-btn" onclick="newGame()">Nova Partida</button>
+                <button id="save-game-btn" onclick="saveCurrentGame()">Salvar Partida</button>
+                <button id="load-game-btn" onclick="showLoadGameDialog()">Carregar Partida</button>
+            </div>
+            
+            <div id="load-game-dialog" style="display: none; margin-top: 20px; padding: 15px; background: #f0f0f0; border-radius: 5px;">
+                <h4>Carregar Partida</h4>
+                <input type="text" id="game-id-input" placeholder="ID da Partida" style="width: 100%; padding: 5px; margin: 5px 0;">
+                <button onclick="loadGameById()" style="width: 100%; padding: 5px; margin: 5px 0;">Carregar</button>
+                <button onclick="hideLoadGameDialog()" style="width: 100%; padding: 5px; margin: 5px 0;">Cancelar</button>
+                <div id="recent-games" style="margin-top: 10px;"></div>
+            </div>
+        </div>
+        
+        <div class="board-main">
+            <div class="tabuleiro theme-green pieces-setClassico" id="chess-board">
+            </div>
+            
+            <div class="captured-pieces">
+                <div class="captured-white">
+                    <h4>Brancas Capturadas:</h4>
+                    <div id="captured-white-pieces"></div>
+                </div>
+                <div class="captured-black">
+                    <h4>Pretas Capturadas:</h4>
+                    <div id="captured-black-pieces"></div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- tela promoção de peão -->
+        <div id="fundo" class="fundo" style="display: none;"></div>
+        <div id="escolhebranco" class="escolhe" style="display: none;">
+            <div onclick="escolhe('rainha','branco');" data-piece="q" data-color="w"></div>
+            <div onclick="escolhe('torre','branco');" data-piece="r" data-color="w"></div>
+            <div onclick="escolhe('cavalo','branco');" data-piece="n" data-color="w"></div>
+            <div onclick="escolhe('bispo','branco');" data-piece="b" data-color="w"></div>
+        </div>
+        <div id="escolhepreto" class="escolhe" style="display: none;">
+            <div onclick="escolhe('rainha','preto');" data-piece="q" data-color="b"></div>
+            <div onclick="escolhe('torre','preto');" data-piece="r" data-color="b"></div>
+            <div onclick="escolhe('cavalo','preto');" data-piece="n" data-color="b"></div>
+            <div onclick="escolhe('bispo','preto');" data-piece="b" data-color="b"></div>
+        </div>
+        
+        <!-- Modal de fim de jogo -->
+        <div id="game-end-modal" class="game-end-modal" style="display: none;">
+            <div class="game-end-content">
+                <div class="game-end-icon">🏆</div>
+                <h2 id="game-end-title">Vitória!</h2>
+                <p id="game-end-message"></p>
+                <button onclick="closeGameEndModal()" class="game-end-button">OK</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        let game = null;
+        let selectedSquare = null;
+        let validMoves = [];
+        let aiPlayer = null;
+        let gameMode = 'human-vs-human';
+        let aiDifficulty = 7;
+        let currentGameId = null;
+
+        
+        function playMoveSound() {
+            const audio = new Audio('../public/sounds/move-self.mp3');
+            audio.volume = 0.5;
+        }
+
+        function playCaptureSound() {
+            const audio = new Audio('../public/sounds/capture.mp3');
+            audio.volume = 0.5;
+        }
+
+        function playGameEndSound() {
+            const audio = new Audio('../public/sounds/game-end.mp3');
+            audio.volume = 0.5;
+        }
+
+        document.addEventListener('DOMContentLoaded', async function() {
+            
+            try {
+                const auth = await AuthAPI.checkAuth();
+                if (!auth.authenticated) {
+                    alert('Você precisa estar logado para jogar!');
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                
+                const avatarNav = document.getElementById('user-avatar-nav');
+                const headerAvatar = document.getElementById('header-avatar');
+                if (avatarNav && headerAvatar) {
+                    avatarNav.style.display = 'inline-block';
+                    const initial = auth.user.username ? auth.user.username.charAt(0).toUpperCase() : '?';
+                    headerAvatar.textContent = initial;
+                    headerAvatar.style.display = 'flex';
+                    headerAvatar.style.alignItems = 'center';
+                    headerAvatar.style.justifyContent = 'center';
+                }
+                
+                
+                setTimeout(() => {
+                    loadUserProfileForHeader();
+                }, 500);
+            } catch (error) {
+                alert('Erro ao verificar autenticação. Redirecionando para login...');
+                window.location.href = 'login.html';
+                return;
+            }
+            
+            
+            let savedBoardTheme = localStorage.getItem('boardTheme') || 'green';
+            
+            
+            if (savedBoardTheme === 'vintage') {
+                savedBoardTheme = 'azul';
+                localStorage.setItem('boardTheme', 'azul');
+            }
+            
+            let savedPiecesTheme = localStorage.getItem('piecesTheme') || 'setClassico';
+            
+            
+            if (savedPiecesTheme === 'unicode' || savedPiecesTheme === 'simple' || savedPiecesTheme === 'bold') {
+                savedPiecesTheme = 'setClassico';
+                localStorage.setItem('piecesTheme', 'setClassico');
+            }
+            
+            
+            document.getElementById('board-theme').value = savedBoardTheme;
+            document.getElementById('pieces-theme').value = savedPiecesTheme;
+            
+            
+            changeBoardTheme();
+            changePiecesTheme();
+            updatePromotionModal();
+            
+            
+            newGame();
+        });
+
+        function newGame() {
+            game = new ChessGame();
+            selectedSquare = null;
+            validMoves = [];
+            currentGameId = null; 
+            
+            if (aiPlayer) {
+                aiPlayer.destroy();
+                aiPlayer = null;
+            }
+            
+            if (gameMode === 'human-vs-ai') {
+                aiPlayer = new SimpleAI(game, 'preto', aiDifficulty);
+            }
+            
+            renderBoard();
+            updateGameInfo();
+            updateCapturedPieces();
+        }
+
+        function getPieceImagePath(piece, theme) {
+            if (!theme || !theme.startsWith('set')) {
+                return null; 
+            }
+            
+            const color = piece.color === 'branco' ? 'w' : 'b';
+            const pieceMap = {
+                'King': 'k',
+                'Queen': 'q',
+                'Rook': 'r',
+                'Bishop': 'b',
+                'Knight': 'n',
+                'Pawn': 'p'
+            };
+            
+            const pieceCode = pieceMap[piece.constructor.name] || 'p';
+            return `../public/images/${theme}/${color}${pieceCode}.png`;
+        }
+
+        function renderBoard() {
+            const board = document.getElementById('chess-board');
+            
+            if (!board) {
+                return;
+            }
+            
+            if (!game) {
+                return;
+            }
+            
+            
+            const currentBoardTheme = document.getElementById('board-theme')?.value || 'green';
+            const currentPiecesTheme = document.getElementById('pieces-theme')?.value || 'setClassico';
+            
+            
+            board.classList.remove('theme-classic', 'theme-dark', 'theme-modern', 'theme-vintage', 'theme-green', 'theme-brown', 'theme-azul');
+            board.classList.remove('pieces-setClassico', 'pieces-setMadeira', 'pieces-setVidro');
+            
+            
+            board.classList.add('theme-' + currentBoardTheme);
+            board.classList.add('pieces-' + currentPiecesTheme);
+            
+            
+            board.innerHTML = '';
+
+            
+            let squaresCreated = 0;
+            for (let row = 1; row <= 8; row++) {
+                for (let col = 1; col <= 8; col++) {
+                    const square = document.createElement('div');
+                    const isWhite = (row + col) % 2 === 0;
+                    square.className = `casa ${isWhite ? 'branca' : 'preta'}`;
+                    square.id = `t${row}${col}`;
+                    square.dataset.row = row;
+                    square.dataset.col = col;
+                    
+                    
+                    
+                    square.style.width = '100%';
+                    square.style.height = '100%';
+                    
+                    square.addEventListener('click', function() {
+                        handleSquareClick(row, col);
+                    });
+
+                    try {
+                        const piece = game.getPiece(row, col);
+                        if (piece) {
+                            const imagePath = getPieceImagePath(piece, currentPiecesTheme);
+                            if (imagePath) {
+                                
+                                const img = document.createElement('img');
+                                img.src = imagePath;
+                                img.alt = piece.constructor.name;
+                                img.className = 'chess-piece-image';
+                                square.appendChild(img);
+                            } else {
+                                
+                                square.innerHTML = piece.getSymbol();
+                            }
+                            square.classList.add('has-piece');
+                        }
+                    } catch (error) {
+                    }
+
+                    
+                    if (validMoves && validMoves.some(move => move.row === row && move.col === col)) {
+                        square.classList.add('valid-move');
+                    }
+
+                    
+                    if (selectedSquare && selectedSquare.row === row && selectedSquare.col === col) {
+                        square.classList.add('selected');
+                    }
+
+                    board.appendChild(square);
+                    squaresCreated++;
+                }
+            }
+        }
+
+        function handleSquareClick(row, col) {
+            if (gameMode === 'human-vs-ai' && game.currentPlayer === 'preto') {
+                return;
+            }
+
+            const piece = game.getPiece(row, col);
+
+            if (!selectedSquare) {
+                if (piece && piece.color === game.currentPlayer) {
+                    selectedSquare = { row, col };
+                    validMoves = getValidMoves(row, col);
+                    renderBoard();
+                }
+            } else {
+                
+                if (selectedSquare.row === row && selectedSquare.col === col) {
+                    selectedSquare = null;
+                    validMoves = [];
+                    renderBoard();
+                }
+                
+                else if (validMoves.some(move => move.row === row && move.col === col)) {
+                    makeMove(selectedSquare.row, selectedSquare.col, row, col);
+                }
+                
+                else if (piece && piece.color === game.currentPlayer) {
+                    selectedSquare = { row, col };
+                    validMoves = getValidMoves(row, col);
+                    renderBoard();
+                }
+                
+                else {
+                    selectedSquare = null;
+                    validMoves = [];
+                    renderBoard();
+                }
+            }
+        }
+
+        function getValidMoves(row, col) {
+            const moves = [];
+            for (let toRow = 1; toRow <= 8; toRow++) {
+                for (let toCol = 1; toCol <= 8; toCol++) {
+                    if (game.isValidMove(row, col, toRow, toCol)) {
+                        moves.push({ row: toRow, col: toCol });
+                    }
+                }
+            }
+            return moves;
+        }
+
+        function makeMove(fromRow, fromCol, toRow, toCol) {
+            const piece = game.getPiece(fromRow, fromCol);
+            const capturedPiece = game.getPiece(toRow, toCol);
+            
+            
+            if (capturedPiece && capturedPiece.constructor.name === 'King') {
+                playGameEndSound();
+                return;
+            }
+            
+            const success = game.movePiece(fromRow, fromCol, toRow, toCol);
+            if (success) {
+                
+                if (capturedPiece) {
+                    playCaptureSound();
+                } else {
+                    
+                    playMoveSound();
+                }
+                
+                selectedSquare = null;
+                validMoves = [];
+                renderBoard();
+                updateGameInfo();
+                updateCapturedPieces();
+                
+                
+                if (piece && piece.constructor.name === 'Pawn') {
+                    if ((piece.color === 'branco' && toRow === 1) || 
+                        (piece.color === 'preto' && toRow === 8)) {
+                        xe = toRow;
+                        ye = toCol;
+                        const cor = piece.color;
+                        updatePromotionModal();
+                        document.getElementById('escolhe' + cor).style.display = 'block';
+                        document.getElementById('fundo').style.display = 'block';
+                    }
+                }
+                
+                
+                if (currentGameId) {
+                    saveMove(game, currentGameId, fromRow, fromCol, toRow, toCol, capturedPiece)
+                }
+                
+                
+                if (game.gameState === 'checkmate') {
+                    playGameEndSound();
+                    
+                    setTimeout(() => {
+                        const winnerColor = game.currentPlayer === 'branco' ? 'preto' : 'branco';
+                        showGameEndModal('checkmate', winnerColor);
+                    }, 500);
+                } else if (game.gameState === 'stalemate') {
+                    playGameEndSound();
+                    
+                    setTimeout(() => {
+                        showGameEndModal('stalemate', null);
+                    }, 500);
+                } else {
+                    
+                    if (gameMode === 'human-vs-ai' && game.currentPlayer === 'preto' && aiPlayer) {
+                        setTimeout(() => {
+                            makeAIMove();
+                        }, 500); 
+                    }
+                }
+            }
+        }
+
+        function updateGameInfo() {
+            const currentPlayerElement = document.getElementById('current-player');
+            const gameStateElement = document.getElementById('game-state');
+            
+            const playerText = game.currentPlayer === 'branco' ? 'Brancas' : 'Pretas';
+            currentPlayerElement.textContent = `Vez das ${playerText}`;
+            
+            let stateText = 'Jogando';
+            if (game.gameState === 'check') {
+                stateText = 'Xeque!';
+            } else if (game.gameState === 'checkmate') {
+                stateText = 'Xeque-mate!';
+            } else if (game.gameState === 'stalemate') {
+                stateText = 'Empate por afogamento';
+            }
+            
+            gameStateElement.textContent = stateText;
+        }
+
+        function updateCapturedPieces() {
+            const whiteCaptured = document.getElementById('captured-white-pieces');
+            const blackCaptured = document.getElementById('captured-black-pieces');
+            const currentPiecesTheme = document.getElementById('pieces-theme')?.value || 'setClassico';
+            
+            const renderPiece = (piece) => {
+                const imagePath = getPieceImagePath(piece, currentPiecesTheme);
+                if (imagePath) {
+                    return `<img src="${imagePath}" alt="${piece.constructor.name}" class="captured-piece" style="width: 1.5em; height: 1.5em; display: inline-block; margin: 0 2px;">`;
+                } else {
+                    return piece.getSymbol();
+                }
+            };
+            
+            whiteCaptured.innerHTML = game.capturedPieces.branco.map(renderPiece).join(' ');
+            blackCaptured.innerHTML = game.capturedPieces.preto.map(renderPiece).join(' ');
+        }
+
+        function updatePromotionModal() {
+            const currentPiecesTheme = document.getElementById('pieces-theme')?.value || 'setClassico';
+            const whiteModal = document.getElementById('escolhebranco');
+            const blackModal = document.getElementById('escolhepreto');
+            
+            const pieceSymbols = {
+                'q': { unicode: { w: '&#9813;', b: '&#9819;' }, name: 'rainha' },
+                'r': { unicode: { w: '&#9814;', b: '&#9820;' }, name: 'torre' },
+                'n': { unicode: { w: '&#9816;', b: '&#9822;' }, name: 'cavalo' },
+                'b': { unicode: { w: '&#9815;', b: '&#9821;' }, name: 'bispo' }
+            };
+            
+            const updateModal = (modal, color) => {
+                const pieces = modal.querySelectorAll('[data-piece]');
+                pieces.forEach(div => {
+                    const pieceCode = div.dataset.piece;
+                    const colorCode = div.dataset.color;
+                    const imagePath = currentPiecesTheme.startsWith('set') 
+                        ? `../public/images/${currentPiecesTheme}/${colorCode}${pieceCode}.png` 
+                        : null;
+                    
+                    if (imagePath) {
+                        div.innerHTML = `<img src="${imagePath}" alt="${pieceSymbols[pieceCode].name}" style="width: 100%; height: 100%; object-fit: contain;">`;
+                    } else {
+                        div.innerHTML = pieceSymbols[pieceCode].unicode[colorCode];
+                    }
+                });
+            };
+            
+            updateModal(whiteModal, 'w');
+            updateModal(blackModal, 'b');
+        }
+
+        let xe, ye;
+
+        function escolhe(pecae, core) {
+            let newPiece;
+            const color = core === 'branco' ? 'branco' : 'preto';
+            
+            switch(pecae) {
+                case 'rainha':
+                    newPiece = new Queen(color, xe, ye);
+                    break;
+                case 'torre':
+                    newPiece = new Rook(color, xe, ye);
+                    break;
+                case 'cavalo':
+                    newPiece = new Knight(color, xe, ye);
+                    break;
+                case 'bispo':
+                    newPiece = new Bishop(color, xe, ye);
+                    break;
+            }
+            
+            game.board[xe][ye] = newPiece;
+            
+            renderBoard();
+            updateGameInfo();
+            
+            document.getElementById('escolhe' + core).style.display = 'none';
+            document.getElementById('fundo').style.display = 'none';
+            
+            if (gameMode === 'human-vs-ai' && game.currentPlayer === 'preto' && aiPlayer) {
+                setTimeout(() => {
+                    makeAIMove();
+                }, 500);
+            }
+        }
+
+        function changeGameMode() {
+            const mode = document.getElementById('game-mode').value;
+            const difficultySelector = document.getElementById('ai-difficulty');
+            
+            gameMode = mode;
+            if (mode === 'human-vs-ai') {
+                difficultySelector.style.display = 'block';
+                if (!aiPlayer) {
+                    aiPlayer = new SimpleAI(game, 'preto', aiDifficulty);
+                }
+            } else {
+                difficultySelector.style.display = 'none';
+                if (aiPlayer) {
+                    aiPlayer.destroy();
+                    aiPlayer = null;
+                }
+            }
+        }
+
+        function changeDifficulty() {
+            const difficulty = parseInt(document.getElementById('difficulty').value);
+            aiDifficulty = difficulty;
+            
+            if (aiPlayer) {
+                aiPlayer.setDifficulty(difficulty);
+            }
+        }
+
+        function changeBoardTheme() {
+            const themeSelect = document.getElementById('board-theme');
+            const board = document.getElementById('chess-board');
+            
+            if (!themeSelect || !board) return;
+            
+            const theme = themeSelect.value || 'green';
+            
+            
+            board.classList.remove('theme-classic', 'theme-dark', 'theme-modern', 'theme-vintage', 'theme-green', 'theme-brown', 'theme-azul');
+            
+            
+            board.classList.add('theme-' + theme);
+            
+            
+            localStorage.setItem('boardTheme', theme);
+            
+            
+            if (game) {
+                renderBoard();
+            }
+        }
+
+        function changePiecesTheme() {
+            const themeSelect = document.getElementById('pieces-theme');
+            const board = document.getElementById('chess-board');
+            
+            if (!themeSelect || !board) return;
+            
+            const theme = themeSelect.value || 'setClassico';
+            
+            
+            board.classList.remove('pieces-setClassico', 'pieces-setMadeira', 'pieces-setVidro');
+            
+            
+            board.classList.add('pieces-' + theme);
+            
+            
+            localStorage.setItem('piecesTheme', theme);
+            
+            
+            updatePromotionModal();
+            
+            
+            if (game) {
+                renderBoard();
+                updateCapturedPieces();
+            }
+        }
+
+        async function makeAIMove() {
+            if (gameMode === 'human-vs-ai' && game.currentPlayer === 'preto' && aiPlayer) {
+                try {
+                    const thinkingElement = document.getElementById('ai-thinking');
+                    if (thinkingElement) {
+                        thinkingElement.style.display = 'block';
+                    }
+                    
+                    const result = await aiPlayer.makeMove();
+                    
+                    if (thinkingElement) {
+                        thinkingElement.style.display = 'none';
+                    }
+                    
+                    
+                    const success = result && result.success;
+                    const captured = result && result.captured;
+                    
+                    if (success) {
+                        
+                        if (captured) {
+                            playCaptureSound();
+                        } else {
+                            playMoveSound();
+                        }
+                        
+                        renderBoard();
+                        updateGameInfo();
+                        updateCapturedPieces();
+                        
+                        if (game.gameState === 'checkmate') {
+                            playGameEndSound();
+                            setTimeout(() => {
+                                const winnerColor = game.currentPlayer === 'branco' ? 'preto' : 'branco';
+                                showGameEndModal('checkmate', winnerColor);
+                            }, 500);
+                        } else if (game.gameState === 'stalemate') {
+                            playGameEndSound();
+                            setTimeout(() => {
+                                showGameEndModal('stalemate', null);
+                            }, 500);
+                        }
+                    }
+                } catch (error) {
+                    const thinkingElement = document.getElementById('ai-thinking');
+                    if (thinkingElement) {
+                        thinkingElement.style.display = 'none';
+                    }
+                }
+            }
+        }
+
+        
+        async function handleLogout() {
+            if (confirm('Deseja realmente sair?')) {
+                try {
+                    await AuthAPI.logout();
+                    window.location.href = 'login.html';
+                } catch (error) {
+                    
+                    window.location.href = 'login.html';
+                }
+            }
+        }
+
+        
+        async function loadUserProfileForHeader() {
+            try {
+                
+                if (typeof ProfileAPI === 'undefined') {
+                    return;
+                }
+                
+                const profile = await ProfileAPI.getProfile();
+                const headerAvatar = document.getElementById('header-avatar');
+                const avatarNav = document.getElementById('user-avatar-nav');
+                
+                if (!avatarNav || !headerAvatar) {
+                    return;
+                }
+                
+                
+                if (profile.foto) {
+                    headerAvatar.innerHTML = `<img src="${profile.foto}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+                } else {
+                    const initial = profile.username ? profile.username.charAt(0).toUpperCase() : '?';
+                    headerAvatar.textContent = initial;
+                    headerAvatar.style.display = 'flex';
+                    headerAvatar.style.alignItems = 'center';
+                    headerAvatar.style.justifyContent = 'center';
+                }
+            } catch (error) {
+                
+            }
+        }
+
+        
+        async function saveCurrentGame() {
+            try {
+                const savedGame = await saveGameState(game, currentGameId);
+                if (savedGame) {
+                    currentGameId = savedGame._id;
+                    alert('Partida salva com sucesso! ID: ' + savedGame._id);
+                } else {
+                    alert('Erro ao salvar partida. Verifique se o servidor está rodando.');
+                }
+            } catch (error) {
+                alert('Erro ao salvar partida: ' + error.message);
+            }
+        }
+
+        function showLoadGameDialog() {
+            const dialog = document.getElementById('load-game-dialog');
+            dialog.style.display = 'block';
+            loadRecentGames();
+        }
+
+        function hideLoadGameDialog() {
+            const dialog = document.getElementById('load-game-dialog');
+            dialog.style.display = 'none';
+        }
+
+        async function loadRecentGames() {
+            try {
+                const games = await GameAPI.getFinishedGames();
+                const container = document.getElementById('recent-games');
+                container.innerHTML = '<h5>Partidas Recentes:</h5>';
+                
+                if (games.length === 0) {
+                    container.innerHTML += '<p>Nenhuma partida encontrada.</p>';
+                    return;
+                }
+
+                games.forEach(game => {
+                    const gameDiv = document.createElement('div');
+                    gameDiv.style.cssText = 'padding: 10px; margin: 5px 0; background: white; border-radius: 3px; cursor: pointer;';
+                    gameDiv.innerHTML = `
+                        <strong>ID:</strong> ${game._id.substring(0, 8)}...<br>
+                        <strong>Modo:</strong> ${game.gameMode === 'human-vs-human' ? 'Humano vs Humano' : 'Humano vs Bot'}<br>
+                        <strong>Estado:</strong> ${game.gameState}<br>
+                        <strong>Data:</strong> ${new Date(game.createdAt).toLocaleString('pt-BR')}
+                    `;
+                    gameDiv.onclick = () => loadGameById(game._id);
+                    container.appendChild(gameDiv);
+                });
+            } catch (error) {
+            }
+        }
+
+        async function loadGameById(gameId = null) {
+            try {
+                const id = gameId || document.getElementById('game-id-input').value;
+                if (!id) {
+                    alert('Por favor, insira um ID de partida.');
+                    return;
+                }
+
+                const savedGame = await GameAPI.getGame(id);
+                if (!savedGame) {
+                    alert('Partida não encontrada.');
+                    return;
+                }
+
+                
+                game = new ChessGame();
+                currentGameId = savedGame._id;
+                gameMode = savedGame.gameMode;
+                aiDifficulty = savedGame.aiDifficulty;
+                game.currentPlayer = savedGame.currentPlayer;
+                game.gameState = savedGame.gameState;
+                game.capturedPieces = {
+                    branco: savedGame.capturedPieces.branco || [],
+                    preto: savedGame.capturedPieces.preto || []
+                };
+
+                
+                document.getElementById('game-mode').value = gameMode;
+                document.getElementById('difficulty').value = aiDifficulty;
+                if (gameMode === 'human-vs-ai') {
+                    document.getElementById('ai-difficulty').style.display = 'block';
+                    if (!aiPlayer) {
+                        aiPlayer = new SimpleAI(game, 'preto', aiDifficulty);
+                    }
+                }
+
+                renderBoard();
+                updateGameInfo();
+                updateCapturedPieces();
+                hideLoadGameDialog();
+                alert('Partida carregada com sucesso!');
+            } catch (error) {
+                alert('Erro ao carregar partida: ' + error.message);
+            }
+        }
+        
+        
+        function showGameEndModal(resultType, winnerColor) {
+            const modal = document.getElementById('game-end-modal');
+            const title = document.getElementById('game-end-title');
+            const message = document.getElementById('game-end-message');
+            
+            if (!modal || !title || !message) return;
+            
+            if (resultType === 'checkmate' && winnerColor) {
+                title.textContent = 'Vitória! 🏆';
+                const colorText = winnerColor === 'branco' ? 'Brancas' : 'Pretas';
+                message.textContent = `As peças ${colorText} venceram!`;
+            } else if (resultType === 'stalemate') {
+                title.textContent = 'Empate! 🤝';
+                message.textContent = 'O jogo terminou em empate por afogamento.';
+            }
+            
+            modal.style.display = 'flex';
+        }
+        
+        function closeGameEndModal() {
+            const modal = document.getElementById('game-end-modal');
+            if (modal) {
+                modal.style.display = 'none';
+            }
+        }
+        
+    </script>
+</body>
+</html> 

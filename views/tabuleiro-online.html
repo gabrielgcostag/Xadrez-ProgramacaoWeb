@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Xadrez Online</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script>
+        
+        (function() {
+            const savedTheme = localStorage.getItem('chess-app-theme');
+            const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            const theme = savedTheme || systemPreference;
+            
+            
+            const html = document.documentElement;
+            html.setAttribute('data-theme', theme);
+            html.classList.add(`${theme}-theme`);
+            
+            
+            const style = document.createElement('style');
+            style.id = 'critical-theme-style';
+            style.textContent = theme === 'dark' 
+                ? `html,body{background-color:#1a1a1a!important;color:#e0e0e0!important;}`
+                : `html,body{background-color:#f0f0f0!important;color:#333!important;}`;
+            document.head.appendChild(style);
+        })();
+    </script>
+    <link rel="stylesheet" href="../public/css/styles.css">
+    <script src="../public/js/theme.js"></script>
+    <script src="../public/js/chess.js"></script>
+    <script src="../public/js/auth.js"></script>
+    <script src="../public/js/api.js"></script>
+    <script src="../public/js/profile.js"></script>
+    <script src="../public/js/header.js"></script>
+    <script src="https:
+    <script src="../public/js/socket-client.js"></script>
+    <style>
+        .online-message {
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+            display: none;
+        }
+        .online-message.success {
+            background: #27ae60;
+            color: white;
+        }
+        .online-message.error {
+            background: #e74c3c;
+            color: white;
+        }
+        .online-message.info {
+            background: #3498db;
+            color: white;
+        }
+        #opponent-info {
+            background: #f0f0f0;
+            padding: 10px;
+            border-radius: 5px;
+            margin-bottom: 15px;
+        }
+        .chat-message {
+            margin-bottom: 8px;
+            padding: 5px;
+            border-radius: 3px;
+            font-size: 0.9em;
+        }
+        .chat-message .username {
+            font-weight: bold;
+            color: #3498db;
+        }
+        .chat-message .timestamp {
+            font-size: 0.8em;
+            color: #7f8c8d;
+            margin-left: 5px;
+        }
+        .chat-message .message-text {
+            margin-top: 3px;
+            color: #333;
+        }

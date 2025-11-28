@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Menu - Xadrez</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
+    <script>
+        
+        (function() {
+            const savedTheme = localStorage.getItem('chess-app-theme');
+            const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+            const theme = savedTheme || systemPreference;
+            
+            
+            const html = document.documentElement;
+            html.setAttribute('data-theme', theme);
+            html.classList.add(`${theme}-theme`);
+            
+            
+            const style = document.createElement('style');
+            style.id = 'critical-theme-style';
+            style.textContent = theme === 'dark' 
+                ? `html,body{background-color:#1a1a1a!important;color:#e0e0e0!important;}`
+                : `html,body{background-color:#f0f0f0!important;color:#333!important;}`;
+            document.head.appendChild(style);
+        })();
+    </script>
+    <link rel="stylesheet" href="../public/css/styles.css">
+    <script src="../public/js/theme.js"></script>
+</head>
+<body>
+    <header class="header">
+        <div class="header-content">
+            <button class="header-toggle" id="headerToggle" onclick="toggleSidebar()">
+                <span class="hamburger">
+                    <span class="line"></span>
+                    <span class="line"></span>
+                    <span class="line"></span>
+                </span>
+            </button>
+            <h1 class="logo"><a href="index.html" style="color: inherit; text-decoration: none;">Xadrez</a></h1>
+            <button class="menu-toggle" id="menuToggle" onclick="toggleMobileMenu()" aria-label="Menu">
+                ☰
+            </button>
+            <nav class="nav">
+                <a href="login.html" class="nav-link" id="login-link">Login</a>
+                <a href="tabuleiro.html" class="nav-link">Jogar Local</a>
+                <a href="lobby.html" class="nav-link">Jogar Online</a>
+                <a href="regras.html" class="nav-link">Regras</a>
+                <a href="dom.html" class="nav-link">DOM</a>
+                <a href="sobre.html" class="nav-link">Sobre</a>
+                <button class="theme-toggle-btn theme-toggle-btn" onclick="toggleTheme()" aria-label="Alternar tema">
+                    <span class="theme-icon">🌙</span>
+                </button>
+                <div id="user-avatar-nav" style="display: none; margin-left: 15px;">
+                    <a href="perfil.html" id="avatar-link" style="display: inline-block;">
+                        <div id="header-avatar" class="header-avatar" style="width: 40px; height: 40px; border-radius: 50%; background: #4CAF50; display: flex; align-items: center; justify-content: center; color: white; font-weight: bold; cursor: pointer; border: 2px solid white;"></div>
+                    </a>
+                </div>
+            </nav>
+        </div>
+        <div class="mobile-menu" id="mobileMenu">
+            <div class="mobile-menu-content">
+                <a href="login.html" class="mobile-menu-link" id="mobile-login-link" onclick="closeMobileMenu()">Login</a>
+                <a href="tabuleiro.html" class="mobile-menu-link" onclick="closeMobileMenu()">Jogar Local</a>
+                <a href="lobby.html" class="mobile-menu-link" onclick="closeMobileMenu()">Jogar Online</a>
+                <a href="regras.html" class="mobile-menu-link" onclick="closeMobileMenu()">Regras</a>
+                <a href="dom.html" class="mobile-menu-link" onclick="closeMobileMenu()">DOM</a>
+                <a href="sobre.html" class="mobile-menu-link" onclick="closeMobileMenu()">Sobre</a>
+                <a href="perfil.html" class="mobile-menu-link" id="mobile-profile-link" onclick="closeMobileMenu()" style="display: none;">Perfil</a>
+                <button class="mobile-menu-link" onclick="toggleTheme(); closeMobileMenu();" style="background: none; border: none; width: 100%; text-align: left; cursor: pointer;">
+                    Alternar Tema
+                </button>
+            </div>
+        </div>
+    </header>
+    <main class="main-content">
+        <div class="container">
+            <h2>Bem-vindo ao Jogo de Xadrez</h2>
+            <p>Escolha uma opção no menu acima.</p>
+            
+            <!-- Card de Ranking -->
+            <div class="ranking-card" id="rankingCard">
+                <div class="ranking-trophy">🏆</div>
+                <div class="ranking-content">
+                    <h3 class="ranking-title">Campeão do Mês</h3>
+                    <div class="ranking-player-info">
+                        <div class="ranking-avatar" id="rankingAvatar">
+                            <span id="rankingInitial">?</span>
+                        </div>
+                        <div class="ranking-details">
+                            <p class="ranking-username" id="rankingUsername">Carregando...</p>
+                            <p class="ranking-score">
+                                <span class="score-label">Pontuação:</span>
+                                <span class="score-value" id="rankingScore">0</span>
+                            </p>
+                            <p class="ranking-highscore">
+                                <span class="highscore-label">High Score:</span>
+                                <span class="highscore-value" id="rankingHighScore">0</span>
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <aside class="sidebar collapsed" id="sidebar">
+        <div class="sidebar-content">
+            <h3>Informações do Projeto</h3>
+            <div class="info-section">
+                <h4>Autores</h4>
+                <ul>
+                    <li>Gabriel Gomes</li>
+                    <li>Larissa Benedet</li>
+                </ul>
+            </div>
+            <div class="info-section">
+                <h4>Curso</h4>
+                <p>Programação para Web</p>
+            </div>
+            <div class="info-section">
+                <h4>Linguagens Utilizadas</h4>
+                <div class="tech-badges">
+                    <span class="badge html">HTML</span>
+                    <span class="badge css">CSS</span>
+                    <span class="badge js">JavaScript</span>
+                </div>
+            </div>
+        </div>
+    </aside>
+    
+    <script src="../public/js/auth.js"></script>
+    <script src="../public/js/profile.js"></script>
+    <script>
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar');
+            sidebar.classList.toggle('collapsed');
+        }
+        
+        function toggleMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.toggle('open');
+        }
+        
+        function closeMobileMenu() {
+            const menu = document.getElementById('mobileMenu');
+            menu.classList.remove('open');
+        }
+        
+        
+        document.addEventListener('DOMContentLoaded', async () => {
+            try {
+                const auth = await AuthAPI.checkAuth();
+                if (auth.authenticated) {
+                    const loginLink = document.getElementById('login-link');
+                    const mobileLoginLink = document.getElementById('mobile-login-link');
+                    if (loginLink) loginLink.style.display = 'none';
+                    if (mobileLoginLink) mobileLoginLink.style.display = 'none';
+                    
+                    
+                    try {
+                        const profile = await ProfileAPI.getProfile();
+                        const headerAvatar = document.getElementById('header-avatar');
+                        const avatarNav = document.getElementById('user-avatar-nav');
+                        const mobileProfileLink = document.getElementById('mobile-profile-link');
+                        
+                        if (avatarNav) {
+                            avatarNav.style.display = 'inline-block';
+                            
+                            if (profile.foto) {
+                                headerAvatar.innerHTML = `<img src="${profile.foto}" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover;">`;
+                            } else {
+                                const initial = profile.username ? profile.username.charAt(0).toUpperCase() : '?';
+                                headerAvatar.textContent = initial;
+                            }
+                        }
+                        
+                        if (mobileProfileLink) {
+                            mobileProfileLink.style.display = 'block';
+                        }
+                    } catch (error) {
+                    }
+                }
+            } catch (error) {
+                
+            }
+            
+            
+            loadTopPlayer();
+        });
+        
+        
+        async function loadTopPlayer() {
+            try {
+                const response = await fetch('/api/ranking/top');
+                if (!response.ok) {
+                    throw new Error('Erro ao carregar ranking');
+                }
+                
+                const topPlayer = await response.json();
+                const rankingCard = document.getElementById('rankingCard');
+                const rankingUsername = document.getElementById('rankingUsername');
+                const rankingScore = document.getElementById('rankingScore');
+                const rankingHighScore = document.getElementById('rankingHighScore');
+                const rankingAvatar = document.getElementById('rankingAvatar');
+                const rankingInitial = document.getElementById('rankingInitial');
+                
+                if (topPlayer && topPlayer.username) {
+                    rankingUsername.textContent = topPlayer.username;
+                    rankingScore.textContent = topPlayer.score || 0;
+                    rankingHighScore.textContent = topPlayer.highScore || 0;
+                    
+                    
+                    if (topPlayer.foto) {
+                        rankingAvatar.innerHTML = `<img src="${topPlayer.foto}" alt="${topPlayer.username}">`;
+                    } else {
+                        rankingInitial.textContent = topPlayer.username.charAt(0).toUpperCase();
+                        rankingInitial.style.display = 'block';
+                    }
+                } else {
+                    rankingUsername.textContent = 'Ainda não há campeões';
+                    rankingScore.textContent = '0';
+                    rankingHighScore.textContent = '0';
+                }
+            } catch (error) {
+                const rankingUsername = document.getElementById('rankingUsername');
+                if (rankingUsername) {
+                    rankingUsername.textContent = 'Erro ao carregar ranking';
+                }
+            }
+        }
+    </script>
+</body>
+</html> 
